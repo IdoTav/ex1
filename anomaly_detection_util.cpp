@@ -70,3 +70,7 @@ float dev(Point p,Line l) {
     float y = l.f(p.x);
     return std::abs(y - p.y);
 }
+
+int main() {
+    std:: cout << "hello world" << std:: endl;
+}
