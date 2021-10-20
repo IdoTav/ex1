@@ -84,11 +84,11 @@ float dev(Point p,Line l) {
     //return std::abs(y - p.y);
 }
 
-int main() {
+/**int main() {
         Point p1 (1,2), p2 (2,2), p3 (3,3);
         Point* ptrArr[3];
         ptrArr[0] = &p1;
         ptrArr[1] = &p2;
         ptrArr[2] = &p3;
         std:: cout << linear_reg(ptrArr,3).a;
-    }
+    }*/
