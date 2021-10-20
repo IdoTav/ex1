@@ -10,10 +10,17 @@ float avg(float* x, int size) {
     return float(sum / size);
 }
 
+float  localPow(float num, float exp) {
+    if (0 == exp)
+        return 1;
+    return num * localPow(num, exp-1);
+}
+
 float avgPow(float* x, int size, int exp) {
     double sum = 0;
     for (int i = 0; i <= size - 1; i++) {
-        sum += std::pow(x[i], exp);
+        //sum += std::pow(x[i], exp);
+        sum += localPow(x[i], (float)exp);
     }
     return float(sum / size);
 }
@@ -21,7 +28,8 @@ float avgPow(float* x, int size, int exp) {
 // returns the variance of X and Y
 float var(float* x, int size) {
     double m = avg(x, size), sum = avgPow(x, size, 2);
-    return float(sum - std::pow(m,2));
+    //return float(sum - std::pow(m,2));
+    return (float) sum - localPow((float) m,2);
 }
 
 void multiplyArray(float* x, float* y, float* c ,int size) {
@@ -68,9 +76,19 @@ float GetXFromLine(Point p, Line l) {
 // returns the deviation between point p and the line
 float dev(Point p,Line l) {
     float y = l.f(p.x);
-    return std::abs(y - p.y);
+    if (y<p.y) {
+        return p.y-y;
+    }
+    else
+        return y-p.y;
+    //return std::abs(y - p.y);
 }
 
 int main() {
-    std:: cout << "hello world" << std:: endl;
-}
+        Point p1 (1,2), p2 (2,2), p3 (3,3);
+        Point* ptrArr[3];
+        ptrArr[0] = &p1;
+        ptrArr[1] = &p2;
+        ptrArr[2] = &p3;
+        std:: cout << linear_reg(ptrArr,3).a;
+    }
