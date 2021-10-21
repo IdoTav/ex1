@@ -1,4 +1,6 @@
 #include <iostream>
+//Ido Tavron 316222512
+//Tal Dabran 316040898
 #include <complex>
 #include "anomaly_detection_util.h"
 
@@ -84,19 +86,9 @@ float GetXFromLine(Point p, Line l) {
 // returns the deviation between point p and the line
 float dev(Point p,Line l) {
     float y = l.f(p.x);
-    if (y<p.y) {
-        return p.y-y;
-    }
-    else
-        return y-p.y;
+    if (y < p.y) {
+        return p.y - y;
+    } else
+        return y - p.y;
     //return std::abs(y - p.y);
 }
-
-/**int main() {
-        Point p1 (1,2), p2 (2,2), p3 (3,3);
-        Point* ptrArr[3];
-        ptrArr[0] = &p1;
-        ptrArr[1] = &p2;
-        ptrArr[2] = &p3;
-        std:: cout << linear_reg(ptrArr,3).a;
-    }*/
