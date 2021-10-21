@@ -11,8 +11,16 @@ float avg(float* x, int size) {
 }
 
 float  localPow(float num, float exp) {
+    //base case
     if (0 == exp)
         return 1;
+    //case the exponent is negative
+    if (0 > exp)
+        return localPow(1/num, -exp);
+    //case the exponent is fraction
+    if (1 > exp && -1 < exp)
+        return num * std::pow(num, exp);
+    //regular case
     return num * localPow(num, exp-1);
 }
 
