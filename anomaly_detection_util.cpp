@@ -29,7 +29,6 @@ float  localPow(float num, float exp) {
 float avgPow(float* x, int size, int exp) {
     double sum = 0;
     for (int i = 0; i <= size - 1; i++) {
-        //sum += std::pow(x[i], exp);
         sum += localPow(x[i], (float)exp);
     }
     return float(sum / size);
@@ -38,7 +37,6 @@ float avgPow(float* x, int size, int exp) {
 // returns the variance of X and Y
 float var(float* x, int size) {
     double m = avg(x, size), sum = avgPow(x, size, 2);
-    //return float(sum - std::pow(m,2));
     return (float) sum - localPow((float) m,2);
 }
 
@@ -90,5 +88,4 @@ float dev(Point p,Line l) {
         return p.y - y;
     } else
         return y - p.y;
-    //return std::abs(y - p.y);
 }
