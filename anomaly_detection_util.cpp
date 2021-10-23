@@ -3,7 +3,6 @@
 //Tal Dabran 316040898
 #include <complex>
 #include "anomaly_detection_util.h"
-
 float avg(float* x, int size) {
     double sum = 0;
     for (int i = 0; i <= size - 1; i++) {
