@@ -1,8 +1,10 @@
 #include <iostream>
 //Ido Tavron 316222512
 //Tal Dabran 316040898
+//GIBRISH
 #include <complex>
 #include "anomaly_detection_util.h"
+
 float avg(float* x, int size) {
     double sum = 0;
     for (int i = 0; i <= size - 1; i++) {
