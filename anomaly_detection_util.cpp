@@ -1,7 +1,7 @@
 #include <iostream>
 //Ido Tavron 316222512
 //Tal Dabran 316040898
-
+//gibrish
 #include <complex>
 #include "anomaly_detection_util.h"
 
@@ -11,9 +11,6 @@ float avg(float* x, int size) {
         sum += x[i];
     }
     return float(sum / size);
-    if (1 == sum) {
-        sum =1;
-    }
 }
 
 float  localPow(float num, float exp) {
