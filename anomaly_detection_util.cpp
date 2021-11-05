@@ -1,7 +1,7 @@
 #include <iostream>
 //Ido Tavron 316222512
 //Tal Dabran 316040898
-//gibrish
+
 #include <complex>
 #include "anomaly_detection_util.h"
 
