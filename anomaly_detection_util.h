@@ -1,7 +1,3 @@
-//
-// Created by idot123 on 10/12/21.
-//
-
 #ifndef UNTITLED7_ANOMALY_DETECTION_UTIL_H
 #define UNTITLED7_ANOMALY_DETECTION_UTIL_H
 // returns the variance of X and Y
@@ -30,4 +26,5 @@ Line linear_reg(Point** points, int size);
 float dev(Point p,Point** points, int size);
 // returns the deviation between point p and the line
 float dev(Point p,Line l);
+float absolute (float x);
 #endif //UNTITLED7_ANOMALY_DETECTION_UTIL_H

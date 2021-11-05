@@ -21,7 +21,7 @@ struct correlatedFeatures{
 };
 
 
-class SimpleAnomalyDetector:public TimeSeriesAnomalyDetector{
+class SimpleAnomalyDetector{
     vector<correlatedFeatures> cf;
 public:
     SimpleAnomalyDetector();

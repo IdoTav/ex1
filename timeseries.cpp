@@ -1,4 +1,5 @@
 #include "timeseries.h"
+#include "SimpleAnomalyDetector.h"
 
 void TimeSeries::initializeMap(vector<float> valueVector, map<string, vector<float>> *initMap) {
     vector<float> vectorArray[_keysVector.size()];
@@ -58,6 +59,9 @@ TimeSeries::TimeSeries(const char *CSVfileName) {
 
 int main() {
     TimeSeries a("testFile1.csv");
+    SimpleAnomalyDetector s;
+    s.learnNormal(a);
+
     int x = 7;
     return 0;
 }

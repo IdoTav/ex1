@@ -5,6 +5,13 @@
 #include <complex>
 #include "anomaly_detection_util.h"
 
+float absolute (float x) {
+    if (x >= 0)
+        return x;
+    else
+        return (-1 * x);
+}
+
 float avg(float* x, int size) {
     double sum = 0;
     for (int i = 0; i <= size - 1; i++) {
@@ -85,8 +92,5 @@ float GetXFromLine(Point p, Line l) {
 // returns the deviation between point p and the line
 float dev(Point p,Line l) {
     float y = l.f(p.x);
-    if (y < p.y) {
-        return p.y - y;
-    } else
-        return y - p.y;
+    return absolute(y-p.y);
 }
