@@ -13,7 +13,7 @@ void TimeSeries::initializeMap(vector<float> valueVector, map<string, vector<flo
     }
 }
 
-void TimeSeries::getKeysFromString(string currentLine) {
+void TimeSeries::getKeysFromString(const string& currentLine) {
     stringstream strArr(currentLine);
     while (strArr.good()) {
         string key;
@@ -22,7 +22,7 @@ void TimeSeries::getKeysFromString(string currentLine) {
     }
 }
 
-void TimeSeries::getValueFromString(string currentLine, vector<float> *valueVector) {
+void TimeSeries::getValueFromString(const string& currentLine, vector<float> *valueVector) {
     stringstream strArr(currentLine);
     while (strArr.good()) {
         string value;
@@ -61,8 +61,6 @@ int main() {
     TimeSeries a("testFile1.csv");
     SimpleAnomalyDetector s;
     s.learnNormal(a);
-
-    int x = 7;
     return 0;
 }
 

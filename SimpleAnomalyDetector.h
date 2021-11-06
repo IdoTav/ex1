@@ -36,7 +36,7 @@ public:
 
 };
 
-float* fromVectorToFloatArray(vector<float>);
+void fromVectorToFloatArray(vector<float>, float array[]);
 
 
 

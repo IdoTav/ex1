@@ -12,8 +12,8 @@ class TimeSeries {
     map<string, vector<float>>_mapData;
     vector<string>_keysVector;
     void initializeMap(vector<float> valueVector,map<string,vector<float>>* initMap);
-    void getKeysFromString(string currentLine);
-    void getValueFromString(string currentLine, vector<float>* valueVector);
+    void getKeysFromString(const string& currentLine);
+    void getValueFromString(const string& currentLine, vector<float>* valueVector);
 public:
     vector<float>getValueByKey(const string& key)const;
     vector<string>getKeysVector()const;
