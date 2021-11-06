@@ -58,7 +58,7 @@ TimeSeries::TimeSeries(const char *CSVfileName) {
 
 
 int main() {
-    TimeSeries a("testFile1.csv");
+    TimeSeries a("123.csv");
     SimpleAnomalyDetector s;
     s.learnNormal(a);
     return 0;

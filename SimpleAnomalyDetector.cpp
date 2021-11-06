@@ -12,11 +12,10 @@ SimpleAnomalyDetector::SimpleAnomalyDetector() {
 SimpleAnomalyDetector::~SimpleAnomalyDetector() {
 }
 
-void initPointsArray (float* feature1, float* feature2, int size, Point** array, Point p[]) {
+void initPointsArray (int size, Point** array, Point p[]) {
     for (int i =0; i < size; i++) {
         array[i] = &p[i];
     }
-    int b =0;
 }
 
 void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
@@ -32,6 +31,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
         tmp.feature1 = *it;
         float bestCor = THERSHOLD;
         Point* pointArr[arraySize];
+        Point p[arraySize];
         for(it2 = it + 1; it2 != keysVector.end(); it2++){
             float array2[ts.getValueByKey(*it2).size()];
             fromVectorToFloatArray(ts.getValueByKey(*it2), array2);
@@ -39,11 +39,10 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
             if (curPearson >= bestCor) {
                 tmp.feature2 = *it2;
                 tmp.corrlation = curPearson;
-                Point p[arraySize];
                 for (int i = 0; i < arraySize; i++) {
                     p[i] = Point(array2[i],array1[i]);
                 }
-                initPointsArray(array2, array1, arraySize, pointArr, p);
+                initPointsArray(arraySize, pointArr, p);
                 tmp.lin_reg = linear_reg(pointArr, arraySize);
                 bestCor = curPearson;
             }
@@ -55,11 +54,12 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
             tmp.threshold = maxDev;
         cf.push_back(tmp);
     }
-    int a =0;
 }
 
 float getMaxDev(Point** pointArr, Line line, int size) {
-    try {
+    if (0 == line.a && 0 == line.b)
+        return -1;
+    else {
         float maxDev = 0;
         for (int i = 0; i < size; i++) {
             float tmpDev = dev(*pointArr[i], line);
@@ -68,10 +68,7 @@ float getMaxDev(Point** pointArr, Line line, int size) {
         }
         return maxDev;
     }
-        catch(...) {
-            return -1;
-        }
-    }
+}
 
 void fromVectorToFloatArray(vector<float>vec, float array[]) {
     for(int i = 0; i<vec.size(); i++) {
