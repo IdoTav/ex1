@@ -1,6 +1,8 @@
 #include "timeseries.h"
 #include "SimpleAnomalyDetector.h"
 
+vector<float> getValueByKey(const string &basicString);
+
 void TimeSeries::initializeMap(vector<float> valueVector, map<string, vector<float>> *initMap) {
     vector<float> vectorArray[_keysVector.size()];
     for (int i = 0; i < valueVector.size(); i++)
@@ -40,6 +42,12 @@ vector<float> TimeSeries:: getValueByKey(const string& key)const {
     return it->second;
 }
 
+float TimeSeries::getValByKeyAndIndex (const string& key, int i)const {
+    vector<float> values = getValueByKey(key);
+    return values[i];
+}
+
+
 TimeSeries::TimeSeries(const char *CSVfileName) {
     ifstream myFile;
     myFile.open(CSVfileName);
@@ -58,9 +66,11 @@ TimeSeries::TimeSeries(const char *CSVfileName) {
 
 
 int main() {
-    TimeSeries a("123.csv");
+    TimeSeries a("trainFile1.csv");
     SimpleAnomalyDetector s;
     s.learnNormal(a);
+    TimeSeries b("testFile1.csv");
+    s.detect(b);
     return 0;
 }
 

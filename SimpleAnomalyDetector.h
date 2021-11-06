@@ -13,6 +13,8 @@
 #include <map>
 #include <vector>
 #include "fstream"
+#include "AnomalyDetector.h"
+
 struct correlatedFeatures{
     string feature1,feature2;  // names of the correlated features
     float corrlation;
@@ -21,19 +23,16 @@ struct correlatedFeatures{
 };
 
 
-class SimpleAnomalyDetector{
+class SimpleAnomalyDetector: public TimeSeriesAnomalyDetector{
     vector<correlatedFeatures> cf;
 public:
     SimpleAnomalyDetector();
     virtual ~SimpleAnomalyDetector();
-
     virtual void learnNormal(const TimeSeries& ts);
-    //virtual vector<AnomalyReport> detect(const TimeSeries& ts);
-
+    virtual vector<AnomalyReport> detect(const TimeSeries& ts);
     vector<correlatedFeatures> getNormalModel(){
         return cf;
     }
-
 };
 
 void fromVectorToFloatArray(vector<float>, float array[]);

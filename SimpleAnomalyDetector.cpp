@@ -6,10 +6,25 @@
 #include <vector>
 #define THERSHOLD 0.5
 
-SimpleAnomalyDetector::SimpleAnomalyDetector() {
+
+float getMaxDev(Point** pointArr, Line line, int size) {
+    if (0 == line.a && 0 == line.b)
+        return -1;
+    else {
+        float maxDev = 0;
+        for (int i = 0; i < size; i++) {
+            float tmpDev = dev(*pointArr[i], line);
+            if (tmpDev >= maxDev)
+                maxDev = tmpDev;
+        }
+        return maxDev;
+    }
 }
 
-SimpleAnomalyDetector::~SimpleAnomalyDetector() {
+void fromVectorToFloatArray(vector<float>vec, float array[]) {
+    for(int i = 0; i<vec.size(); i++) {
+        array[i] = vec[i];
+    }
 }
 
 void initPointsArray (int size, Point** array, Point p[]) {
@@ -17,6 +32,13 @@ void initPointsArray (int size, Point** array, Point p[]) {
         array[i] = &p[i];
     }
 }
+
+SimpleAnomalyDetector::SimpleAnomalyDetector() {
+}
+
+SimpleAnomalyDetector::~SimpleAnomalyDetector() {
+}
+
 
 void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
     vector<string>keysVector = ts.getKeysVector();
@@ -40,7 +62,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
                 tmp.feature2 = *it2;
                 tmp.corrlation = curPearson;
                 for (int i = 0; i < arraySize; i++) {
-                    p[i] = Point(array2[i],array1[i]);
+                    p[i] = Point(array1[i],array2[i]);
                 }
                 initPointsArray(arraySize, pointArr, p);
                 tmp.lin_reg = linear_reg(pointArr, arraySize);
@@ -56,25 +78,23 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
     }
 }
 
-float getMaxDev(Point** pointArr, Line line, int size) {
-    if (0 == line.a && 0 == line.b)
-        return -1;
-    else {
-        float maxDev = 0;
-        for (int i = 0; i < size; i++) {
-            float tmpDev = dev(*pointArr[i], line);
-            if (tmpDev >= maxDev)
-                maxDev = tmpDev;
-        }
-        return maxDev;
-    }
-}
 
-void fromVectorToFloatArray(vector<float>vec, float array[]) {
-    for(int i = 0; i<vec.size(); i++) {
-        array[i] = vec[i];
+vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts) {
+    vector<correlatedFeatures> normalTable = cf;
+    vector<correlatedFeatures>::iterator it;
+    vector<AnomalyReport> arVector;
+    int i =0;
+    for (it = cf.begin(); it != cf.end(); it++) {
+        string feat1 = cf[i].feature1, feat2 = cf[i].feature2;
+        float xVal = ts.getValByKeyAndIndex(feat1, i), yVal = ts.getValByKeyAndIndex(feat2, i);
+        float curDev = cf[i].threshold;
+        Point p(xVal,yVal);
+        if (curDev < dev(p,cf[i].lin_reg)) {
+            string desc = feat1 + "-" + feat2;
+            AnomalyReport ar(desc, i+1);
+            arVector.push_back(ar);
+        }
+        i++;
     }
+    return arVector;
 }
-/*
-vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts){
-}*/
