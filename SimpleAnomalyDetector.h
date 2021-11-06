@@ -37,7 +37,7 @@ public:
 };
 
 void fromVectorToFloatArray(vector<float>, float array[]);
-
+float getMaxDev(Point** pointArr, Line line, int size);
 
 
 #endif /* SIMPLEANOMALYDETECTOR_H_ */

@@ -4,6 +4,7 @@
 #include "timeseries.h"
 #include <string>
 #include <vector>
+#define THERSHOLD 0.5
 
 SimpleAnomalyDetector::SimpleAnomalyDetector() {
 }
@@ -27,8 +28,10 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
         float array1[ts.getValueByKey(*it).size()];
         fromVectorToFloatArray(ts.getValueByKey(*it), array1);
         correlatedFeatures tmp;
+        /*check*/
         tmp.feature1 = *it;
-        float bestCor = 0;
+        float bestCor = THERSHOLD;
+        Point* pointArr[arraySize];
         for(it2 = it + 1; it2 != keysVector.end(); it2++){
             float array2[ts.getValueByKey(*it2).size()];
             fromVectorToFloatArray(ts.getValueByKey(*it2), array2);
@@ -36,15 +39,34 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
             if (curPearson >= bestCor) {
                 tmp.feature2 = *it2;
                 tmp.corrlation = curPearson;
-                Point* pointArr[arraySize];
                 initPointsArray(array2, array1, arraySize, pointArr);
                 tmp.lin_reg = linear_reg(pointArr, arraySize);
                 bestCor = curPearson;
             }
         }
+        float maxDev = getMaxDev(pointArr, tmp.lin_reg, arraySize);
+        if(-1 == maxDev)
+            continue;
+        else
+            tmp.threshold = maxDev;
         cf.push_back(tmp);
     }
 }
+
+float getMaxDev(Point** pointArr, Line line, int size) {
+    try {
+        float maxDev = 0;
+        for (int i = 0; i < size; i++) {
+            float tmpDev = dev(*pointArr[i], line);
+            if (tmpDev >= maxDev)
+                maxDev = tmpDev;
+        }
+        return maxDev;
+    }
+        catch(...) {
+            return -1;
+        }
+    }
 
 void fromVectorToFloatArray(vector<float>vec, float array[]) {
     for(int i = 0; i<vec.size(); i++) {
