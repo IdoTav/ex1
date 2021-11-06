@@ -12,11 +12,11 @@ SimpleAnomalyDetector::SimpleAnomalyDetector() {
 SimpleAnomalyDetector::~SimpleAnomalyDetector() {
 }
 
-void initPointsArray (float* feature1, float* feature2, int size, Point** array) {
-    for (int i = 0; i < size; i++) {
-        Point p(feature1[i], feature2[i]);
-        array[i] = &p;
+void initPointsArray (float* feature1, float* feature2, int size, Point** array, Point p[]) {
+    for (int i =0; i < size; i++) {
+        array[i] = &p[i];
     }
+    int b =0;
 }
 
 void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
@@ -39,7 +39,11 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
             if (curPearson >= bestCor) {
                 tmp.feature2 = *it2;
                 tmp.corrlation = curPearson;
-                initPointsArray(array2, array1, arraySize, pointArr);
+                Point p[arraySize];
+                for (int i = 0; i < arraySize; i++) {
+                    p[i] = Point(array2[i],array1[i]);
+                }
+                initPointsArray(array2, array1, arraySize, pointArr, p);
                 tmp.lin_reg = linear_reg(pointArr, arraySize);
                 bestCor = curPearson;
             }
@@ -51,6 +55,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
             tmp.threshold = maxDev;
         cf.push_back(tmp);
     }
+    int a =0;
 }
 
 float getMaxDev(Point** pointArr, Line line, int size) {
