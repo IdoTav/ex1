@@ -65,14 +65,5 @@ TimeSeries::TimeSeries(const char *CSVfileName) {
 }
 
 
-int main() {
-    TimeSeries a("trainFile1.csv");
-    SimpleAnomalyDetector s;
-    s.learnNormal(a);
-    TimeSeries b("testFile1.csv");
-    s.detect(b);
-    return 0;
-}
-
 
 

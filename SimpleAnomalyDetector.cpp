@@ -49,7 +49,6 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
         float array1[ts.getValueByKey(*it).size()];
         fromVectorToFloatArray(ts.getValueByKey(*it), array1);
         correlatedFeatures tmp;
-        /*check*/
         tmp.feature1 = *it;
         float bestCor = THERSHOLD;
         Point* pointArr[arraySize];
@@ -80,21 +79,21 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
 
 
 vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts) {
-    vector<correlatedFeatures> normalTable = cf;
     vector<correlatedFeatures>::iterator it;
     vector<AnomalyReport> arVector;
-    int i =0;
-    for (it = cf.begin(); it != cf.end(); it++) {
-        string feat1 = cf[i].feature1, feat2 = cf[i].feature2;
-        float xVal = ts.getValByKeyAndIndex(feat1, i), yVal = ts.getValByKeyAndIndex(feat2, i);
-        float curDev = cf[i].threshold;
-        Point p(xVal,yVal);
-        if (curDev < dev(p,cf[i].lin_reg)) {
-            string desc = feat1 + "-" + feat2;
-            AnomalyReport ar(desc, i+1);
-            arVector.push_back(ar);
+    for(int i = 0; i < ts.getValueByKey(ts.getKeysVector()[1]).size(); i++) {
+        int j = 0;
+        for (it = cf.begin(); it != cf.end(); it++) {
+            float xVal = ts.getValByKeyAndIndex(cf[j].feature1, i), yVal = ts.getValByKeyAndIndex(cf[j].feature2, i);
+            float curDev = cf[j].threshold;
+            Point p(xVal, yVal);
+            if (curDev < dev(p, cf[j].lin_reg)) {
+                string desc = cf[j].feature1 + "-" + cf[j].feature2;
+                AnomalyReport ar(desc, i + 1);
+                arVector.push_back(ar);
+            }
+            j++;
         }
-        i++;
     }
     return arVector;
 }
