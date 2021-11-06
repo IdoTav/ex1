@@ -4,7 +4,7 @@
 #include "timeseries.h"
 #include <string>
 #include <vector>
-#define THERSHOLD 0.5
+#define THERSHOLD 0.9
 
 
 float getMaxDev(Point** pointArr, Line line, int size) {
@@ -72,7 +72,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
         if(-1 == maxDev)
             continue;
         else
-            tmp.threshold = maxDev;
+            tmp.threshold = 1.1 * maxDev;
         cf.push_back(tmp);
     }
 }
