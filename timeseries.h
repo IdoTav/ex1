@@ -1,3 +1,5 @@
+//Ido Tavron 316222512
+//Tal Dabran 316040898
 #ifndef TIMESERIES_H_
 #define TIMESERIES_H_
 #include "timeseries.h"

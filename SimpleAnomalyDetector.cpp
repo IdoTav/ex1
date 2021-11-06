@@ -1,4 +1,5 @@
-
+//Ido Tavron 316222512
+//Tal Dabran 316040898
 #include "SimpleAnomalyDetector.h"
 #include "anomaly_detection_util.h"
 #include "timeseries.h"
