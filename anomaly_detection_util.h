@@ -1,3 +1,5 @@
+//Ido Tavron 316222512
+//Tal Dabran 316040898
 #ifndef UNTITLED7_ANOMALY_DETECTION_UTIL_H
 #define UNTITLED7_ANOMALY_DETECTION_UTIL_H
 // returns the variance of X and Y

@@ -1,4 +1,5 @@
-
+//Ido Tavron 316222512
+//Tal Dabran 316040898
 #ifndef SIMPLEANOMALYDETECTOR_H_
 #define SIMPLEANOMALYDETECTOR_H_
 #include "timeseries.h"
