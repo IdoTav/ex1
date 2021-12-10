@@ -95,6 +95,3 @@ TimeSeries::TimeSeries(const char *CSVfileName) {
     initializeMap(valueVector, &_mapData);
 }
 
-
-
-
