@@ -101,7 +101,6 @@ Circle find_3_or_low_circle(vector<Point>& P) {
     // by 2 points only
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-
             Circle c = get_circle(P[i], P[j]);
             if (check_if_valid(c, P))
                 return c;
@@ -140,11 +139,9 @@ Circle find_the_min_circle(vector<Point>& P, vector<Point> R, int n) {
  * @oaram n is the number of points in the vector p
  */
 Circle findMinCircle(Point** points, size_t size) {
-    vector<Point*> copyVector(size);
-    copy(points + 0, points + size, copyVector.begin());
-    vector<Point> pointsVector(copyVector.size());
-    for (int i = 0; i < copyVector.size(); i++)
-        pointsVector[i] = *(copyVector[i]);
+    vector<Point> pointsVector(size);
+    for (int i = 0; i < size; i++)
+        pointsVector[i] = *(*(points + i));
     random_shuffle(pointsVector.begin(), pointsVector.end());
     return find_the_min_circle(pointsVector, {}, pointsVector.size());
 }
