@@ -34,6 +34,9 @@ public:
     virtual ~SimpleAnomalyDetector();
     virtual void learnNormal(const TimeSeries& ts);
     virtual vector<AnomalyReport> detect(const TimeSeries& ts);
+    virtual void pickMethod(correlatedFeatures* cor, float curPearson, float upThresh, float lowThresh,
+                          int arraySize, string it2, Point** pointArr, Point* p,
+                          float* array1, float* array2);
     vector<correlatedFeatures> getNormalModel(){
         return cf;
     }
@@ -42,6 +45,7 @@ public:
 void fromVectorToFloatArray(vector<float>, float array[]);
 float getMaxDev(Point** ptrPointArr, Line line, int size);
 void initPointsArray (int size, Point** ptrArray, Point p[]);
+AnomalyReport addReport(correlatedFeatures* cor, int i);
 
 
 #endif /* SIMPLEANOMALYDETECTOR_H_ */

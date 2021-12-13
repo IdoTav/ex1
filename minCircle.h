@@ -11,7 +11,6 @@ using namespace std;
 
 
 // ------------ DO NOT CHANGE -----------
-
 class Circle{
 public:
     Point center;
