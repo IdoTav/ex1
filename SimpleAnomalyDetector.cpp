@@ -103,7 +103,7 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
                 tmp.min_cir = Circle();
                 bestCor = curPearson;
             }
-            // Case the best correlation we find is more than 0.5 but less than 0.9
+                // Case the best correlation we find is more than 0.5 but less than 0.9
             else if (curPearson >  bedCor) {
                 tmp.feature2 = *it2;
                 tmp.corrlation = curPearson;
@@ -158,15 +158,17 @@ vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts) {
                     arVector.push_back(ar);
                 }
             } else {
-                if (cf[j].min_cir.radius < 1.1 * find_the_distance(p, cf[j].min_cir.center)) {
+                /*
+                if (1.1 * cf[j].min_cir.radius < find_the_distance(p, cf[j].min_cir.center)) {
                     string desc = cf[j].feature1 + "-" + cf[j].feature2;
                     AnomalyReport ar(desc, i + 1);
                     //add the anomaly to the anomaly reports
                     arVector.push_back(ar);
                 }
-                j++;
+                 */
             }
+            j++;
         }
-        return arVector;
     }
+    return arVector;
 }

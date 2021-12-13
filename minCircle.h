@@ -1,4 +1,3 @@
-
 #ifndef MINCIRCLE_H_
 #define MINCIRCLE_H_
 
