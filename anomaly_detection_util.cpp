@@ -4,6 +4,7 @@
 
 #include <complex>
 #include "anomaly_detection_util.h"
+#include "minCircle.h"
 
 float absolute (float x) {
     if (x >= 0)

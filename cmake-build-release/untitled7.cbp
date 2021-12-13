@@ -85,6 +85,12 @@
 		<Unit filename="/home/dabrant/CLionProjects/advancedprogramming/AnomalyDetector.h">
 			<Option target="untitled7"/>
 		</Unit>
+		<Unit filename="/home/dabrant/CLionProjects/advancedprogramming/HybridAnomalyDetector.cpp">
+			<Option target="untitled7"/>
+		</Unit>
+		<Unit filename="/home/dabrant/CLionProjects/advancedprogramming/HybridAnomalyDetector.h">
+			<Option target="untitled7"/>
+		</Unit>
 		<Unit filename="/home/dabrant/CLionProjects/advancedprogramming/MainTrain.cpp">
 			<Option target="untitled7"/>
 		</Unit>
@@ -98,6 +104,12 @@
 			<Option target="untitled7"/>
 		</Unit>
 		<Unit filename="/home/dabrant/CLionProjects/advancedprogramming/anomaly_detection_util.h">
+			<Option target="untitled7"/>
+		</Unit>
+		<Unit filename="/home/dabrant/CLionProjects/advancedprogramming/minCircle.cpp">
+			<Option target="untitled7"/>
+		</Unit>
+		<Unit filename="/home/dabrant/CLionProjects/advancedprogramming/minCircle.h">
 			<Option target="untitled7"/>
 		</Unit>
 		<Unit filename="/home/dabrant/CLionProjects/advancedprogramming/timeseries.cpp">
