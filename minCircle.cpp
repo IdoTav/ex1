@@ -4,10 +4,9 @@
 #include "anomaly_detection_util.h"
 #include <algorithm>
 #include <assert.h>
-#include <iostream>
-#include <math.h>
+#include <cmath>
 #include <vector>
-const double INF = 1e18;
+
 
 /**
  * this function dist calculate the distance between two points
@@ -39,7 +38,7 @@ Point find_circle_center(float bx, float by, float cx, float cy) {
     float B = bx * bx + by * by;
     float C = cx * cx + cy * cy;
     float D = bx * cy - by * cx;
-    Point point = Point((cy * B - by * C) / (2 * D),(bx * C - cx * B) / (2 * D));
+    Point point = Point((cy * B - by * C) / (float)(2 * D),(bx * C - cx * B) / (float)(2 * D));
     return point;
 }
 
@@ -63,8 +62,8 @@ Circle find_circle(const Point& A, const Point& B, const Point& C) {
  * @param B is a Point that with this point we will get a circle
  */
 Circle get_circle(const Point& A, const Point& B) {
-    Point C = { (A.x + B.x) / 2, (A.y + B.y) / 2 };
-    Circle circle = Circle(C, find_the_distance(A, B) / 2);
+    Point C = { (A.x + B.x) / (float)2, (A.y + B.y) / (float) 2 };
+    Circle circle = Circle(C, find_the_distance(A, B) / (float) 2);
     return circle;
 }
 

@@ -1,11 +1,14 @@
 
 #include "HybridAnomalyDetector.h"
+#include "SimpleAnomalyDetector.h"
 
 HybridAnomalyDetector::HybridAnomalyDetector() {
-    // TODO Auto-generated constructor stub
-
 }
 
 HybridAnomalyDetector::~HybridAnomalyDetector() {
-    // TODO Auto-generated destructor stub
+}
+
+vector<AnomalyReport> detect( ,const TimeSeries& ts) {
+    this.SimpleAnomalyDetector::detect(ts);
+
 }

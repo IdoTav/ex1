@@ -5,7 +5,8 @@
 #include "timeseries.h"
 #include <string>
 #include <vector>
-#define THERSHOLD 0.9
+#define TOP_THERSHOLD 0.9
+#define BOT_THERSHOLD 0.5
 
 SimpleAnomalyDetector::SimpleAnomalyDetector() {
 }
@@ -14,7 +15,7 @@ SimpleAnomalyDetector::~SimpleAnomalyDetector() {
 }
 
 /**
- * this function get ptrPointArr and line, she is returns the most long distance between the
+ * this function get ptrPointArr and line, it is returns the most long distance between the
  * given line to the farest point
  * @param ptrPointArr is a pointer to array with pointers who points to Point objects
  * @param line is a given line
@@ -80,11 +81,12 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
         correlatedFeatures tmp;
         tmp.feature1 = *it;
         //set the minimum threshold we can live with
-        float bestCor = THERSHOLD;
+        float bestCor = TOP_THERSHOLD;
+        float bedCor = BOT_THERSHOLD;
         Point* pointArr[arraySize];
         Point p[arraySize];
         // run the second key (feature 2) by initializing the iterator to the next to the main key
-        for(auto it2 = it + 1; it2 != keysVector.end(); it2++){
+        for(auto it2 = it + 1; it2 != keysVector.end(); it2++) {
             float array2[ts.getValuesByKey(*it2).size()];
             fromVectorToFloatArray(ts.getValuesByKey(*it2), array2);
             float curPearson = absolute(pearson(array1, array2, arraySize));
@@ -93,18 +95,37 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
                 tmp.feature2 = *it2;
                 tmp.corrlation = curPearson;
                 for (int i = 0; i < arraySize; i++) {
-                    p[i] = Point(array1[i],array2[i]);
+                    p[i] = Point(array1[i], array2[i]);
                 }
                 initPointsArray(arraySize, pointArr, p);
                 tmp.lin_reg = linear_reg(pointArr, arraySize);
+                // If we get into this condition we don't care about the circle
+                tmp.min_cir = Circle();
                 bestCor = curPearson;
             }
+                // Case the best correlation we find is more than 0.5 but less than 0.9
+            else if (curPearson >  bedCor) {
+                tmp.feature2 = *it2;
+                tmp.corrlation = curPearson;
+                for (int i = 0; i < arraySize; i++) {
+                    p[i] = Point(array1[i], array2[i]);
+                }
+                initPointsArray(arraySize, pointArr, p);
+                tmp.min_cir = findMinCircle(pointArr, arraySize);
+                bedCor = curPearson;
+            }
         }
-        float maxDev = getMaxDev(pointArr, tmp.lin_reg, arraySize);
+        float maxDev;
+        if (0 == tmp.min_cir.radius) {
+            maxDev = getMaxDev(pointArr, tmp.lin_reg, arraySize);
+        }
+        else {
+            maxDev = tmp.min_cir.radius;
+        }
         //case there is no maxDev
         if(-1 == maxDev)
             continue;
-        //make sure the threshold will be accurate
+            //make sure the threshold will be accurate
         else
             tmp.threshold = (float) 1.1 * maxDev;
         //add the correlated feature to the correlated features vector
@@ -121,19 +142,30 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
 vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts) {
     vector<AnomalyReport> arVector;
     //run all over the rows on the given data
-    for(int i = 0; i < ts.getValuesByKey(ts.getKeysVector()[1]).size(); i++) {
+    for (int i = 0; i < ts.getValuesByKey(ts.getKeysVector()[1]).size(); i++) {
         int j = 0;
         //looking for correlated features who can be compared with specific points in a row
         for (auto it = cf.begin(); it != cf.end(); it++) {
             float xVal = ts.getValByKeyAndIndex(cf[j].feature1, i), yVal = ts.getValByKeyAndIndex(cf[j].feature2, i);
             float curDev = cf[j].threshold;
             Point p(xVal, yVal);
-            //check if there is an anomaly
-            if (curDev < dev(p, cf[j].lin_reg)) {
-                string desc = cf[j].feature1 + "-" + cf[j].feature2;
-                AnomalyReport ar(desc, i + 1);
-                //add the anomaly to the anomaly reports
-                arVector.push_back(ar);
+            if (0 == cf[j].min_cir.radius) {
+                //check if there is an anomaly
+                if (curDev < dev(p, cf[j].lin_reg)) {
+                    string desc = cf[j].feature1 + "-" + cf[j].feature2;
+                    AnomalyReport ar(desc, i + 1);
+                    //add the anomaly to the anomaly reports
+                    arVector.push_back(ar);
+                }
+            } else {
+                /*
+                if (1.1 * cf[j].min_cir.radius < find_the_distance(p, cf[j].min_cir.center)) {
+                    string desc = cf[j].feature1 + "-" + cf[j].feature2;
+                    AnomalyReport ar(desc, i + 1);
+                    //add the anomaly to the anomaly reports
+                    arVector.push_back(ar);
+                }
+                 */
             }
             j++;
         }
