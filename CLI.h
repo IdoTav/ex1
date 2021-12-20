@@ -12,6 +12,10 @@ class CLI {
 	DefaultIO* dio;
 	// you can add data members
 public:
+    TimeSeries* trainTs;
+    TimeSeries* testTs;
+    HybridAnomalyDetector* ad;
+    vector<AnomalyReport>* r;
 	CLI(DefaultIO* dio);
 	void start();
 	virtual ~CLI();

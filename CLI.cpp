@@ -2,6 +2,10 @@
 #include "commands.h"
 
 CLI::CLI(DefaultIO* dio) {
+    TimeSeries* trainTs;
+    TimeSeries* testTs;
+    HybridAnomalyDetector* ad;
+    vector<AnomalyReport>* r;
 }
 
 
@@ -25,22 +29,22 @@ void CLI::start(){
             break;
         switch (i) {
             case(1): {
-                uploadAtimeSeriesCommand t;
+                uploadAtimeSeriesCommand t(trainTs, testTs, ad, r);
                 t.execute();
                 break;
             }
             case(2): {
-                currentThresholdCommand c;
+                currentThresholdCommand c(trainTs, testTs, ad, r);
                 c.execute();
                 break;
             }
             case(3): {
-                detectAnomaliesCommand d;
+                detectAnomaliesCommand d(trainTs, testTs, ad, r);
                 d.execute();
                 break;
             }
             case(4): {
-                displayCommand ds;
+                displayCommand ds (trainTs, testTs, ad, r);
                 ds.execute();
                 break;
             }

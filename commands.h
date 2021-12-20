@@ -34,47 +34,22 @@ class Command{
 protected:
     TimeSeries* trainTs;
     TimeSeries* testTs;
-    HybridAnomalyDetector ad;
+    HybridAnomalyDetector* ad;
     vector<AnomalyReport>* r;
 public:
-	Command(DefaultIO* dio):dio(dio){}
-    Command() {
-        TimeSeries* trainTs;
-        TimeSeries* testTs;
-        HybridAnomalyDetector ad;
-        vector<AnomalyReport>* r;
-    }
+	// Command(DefaultIO* dio):dio(dio){}
+    Command(TimeSeries* trainTsC, TimeSeries* testTsC, HybridAnomalyDetector* adC, vector<AnomalyReport>* rC):
+    trainTs(trainTsC), testTs(testTsC), ad(adC), r(rC){}
+    //Command(int l) {l = 6;}
 	virtual void execute()=0;
 	virtual ~Command(){}
 };
 
 
-class detectAnomaliesCommand:public Command {
-public:
-    virtual void execute() {
-        ad.learnNormal(*trainTs);
-        vector<AnomalyReport> tmp = ad.detect(*testTs);
-        r = &tmp;
-        std::cout << "anomaly detection complete." << std::endl;
-    }
-};
-
-class currentThresholdCommand:public Command{
-public:
-    virtual void execute() {
-        std::cout << "The current correlation threshold is" << " " << ad.getTopThreshold() << std::endl;
-        float newThreshold;
-        std::cin >> newThreshold;
-        while (newThreshold < 0 || newThreshold > 1) {
-            std::cout <<"please choose a value between 0 and 1." << std::endl;
-            std::cin >> newThreshold;
-        }
-        ad.setTopThreshold(newThreshold);
-    }
-};
-
 class uploadAtimeSeriesCommand:public Command{
 public:
+    uploadAtimeSeriesCommand(TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+                             vector<AnomalyReport> *rC) : Command(trainTsC, testTsC, adC, rC) {}
     virtual void execute() {
         std::cout << "Please upload your local test CSV file." << std::endl;
         std::ofstream serverFile("anomalyTrain.csv");
@@ -109,8 +84,38 @@ public:
     }
 };
 
+
+class detectAnomaliesCommand:public Command {
+public:
+    detectAnomaliesCommand(TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+    vector<AnomalyReport> *rC) : Command(trainTsC, testTsC, adC, rC) {}
+    virtual void execute() {
+        (*ad).learnNormal(*trainTs);
+        *r = (*ad).detect(*testTs);
+        std::cout << "anomaly detection complete." << std::endl;
+    }
+};
+
+class currentThresholdCommand:public Command{
+public:
+    currentThresholdCommand(TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+    vector<AnomalyReport> *rC) : Command(trainTsC, testTsC, adC, rC) {}
+    virtual void execute() {
+        std::cout << "The current correlation threshold is" << " " << ad->getTopThreshold() << std::endl;
+        float newThreshold;
+        std::cin >> newThreshold;
+        while (newThreshold < 0 || newThreshold > 1) {
+            std::cout <<"please choose a value between 0 and 1." << std::endl;
+            std::cin >> newThreshold;
+        }
+        ad->setTopThreshold(newThreshold);
+    }
+};
+
 class displayCommand:public Command{
 public:
+    displayCommand(TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+    vector<AnomalyReport> *rC) : Command(trainTsC, testTsC, adC, rC) {}
     virtual void execute(){
         for (AnomalyReport ar : *r) {
             std::cout << to_string(ar.timeStep) << " " << ar.description << std::endl;
