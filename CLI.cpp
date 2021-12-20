@@ -3,6 +3,7 @@
 CLI::CLI(DefaultIO* dio) {
 }
 
+
 void printMenu() {
     std::cout<<"Welcome to the Anomaly Detection Server.\n"
                "Please choose an option:\n"
@@ -25,7 +26,6 @@ void CLI::start(){
             case(1): {
                 //UPLOAD A TIME SERIES CSV FILE
             }
-
             case(2): {
                 //ALGORITHM SETTINGS
             }

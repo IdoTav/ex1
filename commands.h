@@ -1,5 +1,6 @@
-
-
+#include <filesystem>
+#include <iostream>
+#include <fstream>
 #ifndef COMMANDS_H_
 #define COMMANDS_H_
 
@@ -11,7 +12,8 @@
 #include "HybridAnomalyDetector.h"
 
 using namespace std;
-TimeSeries ts();
+TimeSeries trainTs;
+TimeSeries testTs;
 HybridAnomalyDetector ad();
 vector<AnomalyReport> r;
 
@@ -38,7 +40,41 @@ public:
 	virtual ~Command(){}
 };
 
-// implement here your command classes
+void currentThreshold() {
+    std:cout << "he current correlation threshold is" <<
+}
+
+void uploadAtimeSeries() {
+    std::cout << "Please upload your local test CSV file." << std::endl;
+    std::ofstream serverFile("anomalyTrain.csv");
+    std::ifstream clientFile;
+    clientFile.open("trainFile.csv", ios::in);
+    serverFile.open("anomalyTrain.csv", ios::out);
+    string tp;
+    while (getline(clientFile, tp)) {
+        if (tp == "done")
+            break;
+        serverFile << tp;
+    }
+    serverFile.close();
+    clientFile.close();
+    trainTs = TimeSeries("anomalyTrain.csv");
+    std::cout << "Please upload your local train CSV file." << std::endl;
+    std::ofstream serverFile1("anomalyTest.csv");
+    std::ifstream clientFile1;
+    clientFile1.open("testFile.csv", ios::in);
+    serverFile1.open("anomalyTest.csv", ios::out);
+    while (getline(clientFile1, tp)) {
+        if (tp == "done")
+            break;
+        serverFile1 << tp;
+    }
+    std:
+    cout << "Upload complete" << std::endl;
+    serverFile1.close();
+    clientFile1.close();
+    testTs = TimeSeries("anomalyTest.csv");
+}
 
 class displayCommand:public Command{
     DefaultIO* dio;
