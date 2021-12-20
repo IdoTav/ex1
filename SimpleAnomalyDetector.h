@@ -27,9 +27,10 @@ struct correlatedFeatures{
 
 
 class SimpleAnomalyDetector: public TimeSeriesAnomalyDetector{
-protected:
-    vector<correlatedFeatures> cf;
 public:
+    float topThreshold = 0.9;
+    float botThreshold = 0.5;
+    vector<correlatedFeatures> cf;
     SimpleAnomalyDetector();
     virtual ~SimpleAnomalyDetector();
     virtual void learnNormal(const TimeSeries& ts);
@@ -39,6 +40,15 @@ public:
                           float* array1, float* array2);
     vector<correlatedFeatures> getNormalModel(){
         return cf;
+    }
+    float getTopThreshold(){
+        return this->topThreshold;
+    }
+    float getBotThreshold(){
+        return this->botThreshold;
+    }
+    void setTopThreshold(float num){
+        this->topThreshold = num;
     }
 };
 

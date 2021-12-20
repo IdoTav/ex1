@@ -14,7 +14,7 @@
 using namespace std;
 TimeSeries trainTs;
 TimeSeries testTs;
-HybridAnomalyDetector ad();
+HybridAnomalyDetector ad;
 vector<AnomalyReport> r;
 
 class DefaultIO{
@@ -41,7 +41,14 @@ public:
 };
 
 void currentThreshold() {
-    std:cout << "he current correlation threshold is" <<
+    std::cout << "The current correlation threshold is" << ad.getTopThreshold() << std::endl;
+    float newThreshold;
+    std::cin >> newThreshold;
+    while (newThreshold < 0 || newThreshold > 1) {
+        std::cout <<"please choose a value between 0 and 1." << std::endl;
+        std::cin >> newThreshold;
+    }
+    ad.setTopThreshold(newThreshold);
 }
 
 void uploadAtimeSeries() {

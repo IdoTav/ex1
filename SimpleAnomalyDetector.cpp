@@ -5,8 +5,6 @@
 #include "timeseries.h"
 #include <string>
 #include <vector>
-#define TOP_THERSHOLD 0.9
-#define BOT_THERSHOLD 0.5
 
 SimpleAnomalyDetector::SimpleAnomalyDetector() {
 }
@@ -98,8 +96,8 @@ void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
         correlatedFeatures tmp;
         tmp.feature1 = *it;
         //set the minimum threshold we can live with
-        float bestCor = TOP_THERSHOLD;
-        float bedCor = BOT_THERSHOLD;
+        float bestCor = this->topThreshold;
+        float bedCor = this->botThreshold;
         Point* pointArr[arraySize];
         Point p[arraySize];
         // run the second key (feature 2) by initializing the iterator to the next to the main key

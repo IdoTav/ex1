@@ -2,8 +2,7 @@
 //Tal Dabran 316040898
 #include "HybridAnomalyDetector.h"
 #include "SimpleAnomalyDetector.h"
-#define TOP_THERSHOLD 0.9
-#define BOT_THERSHOLD 0.5
+
 
 HybridAnomalyDetector::HybridAnomalyDetector() {
 }
