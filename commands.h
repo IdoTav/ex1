@@ -40,6 +40,13 @@ public:
 	virtual ~Command(){}
 };
 
+
+void detectAnomalies(){
+    ad.learnNormal(trainTs);
+    r = ad.detect(testTs);
+    std::cout << "anomaly detection complete." << std::endl;
+}
+
 void currentThreshold() {
     std::cout << "The current correlation threshold is" << ad.getTopThreshold() << std::endl;
     float newThreshold;
@@ -76,8 +83,7 @@ void uploadAtimeSeries() {
             break;
         serverFile1 << tp;
     }
-    std:
-    cout << "Upload complete" << std::endl;
+    std::cout << "Upload complete" << std::endl;
     serverFile1.close();
     clientFile1.close();
     testTs = TimeSeries("anomalyTest.csv");
