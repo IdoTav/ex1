@@ -11,6 +11,9 @@
 #include "HybridAnomalyDetector.h"
 
 using namespace std;
+TimeSeries ts();
+HybridAnomalyDetector ad();
+vector<AnomalyReport> r;
 
 class DefaultIO{
 public:
@@ -36,6 +39,16 @@ public:
 };
 
 // implement here your command classes
+
+class displayCommand:public Command{
+    DefaultIO* dio;
+public:
+    virtual void execute(){
+        for (AnomalyReport ar : r) {
+            std::cout << ar.timeStep + " " + ar.description << std::endl;
+        }
+    }
+};
 
 
 

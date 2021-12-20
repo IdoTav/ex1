@@ -17,6 +17,7 @@ class TimeSeries {
     void getKeysFromString(const string& currentLine);
     void getValueFromString(const string& currentLine, vector<float>* valueVector);
 public:
+    TimeSeries(){};
     TimeSeries(const char* CSVfileName);
     vector<float>getValuesByKey(const string& key)const;
     vector<string>getKeysVector()const;
