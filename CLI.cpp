@@ -1,4 +1,5 @@
 #include "CLI.h"
+#include "commands.h"
 
 CLI::CLI(DefaultIO* dio) {
 }
@@ -24,18 +25,23 @@ void CLI::start(){
             break;
         switch (i) {
             case(1): {
-                uploadAtimeSeries();
+                uploadAtimeSeriesCommand t;
+                t.execute();
                 break;
             }
             case(2): {
-                currentThreshold();
+                currentThresholdCommand c;
+                c.execute();
                 break;
             }
             case(3): {
-                detectAnomalies();
+                detectAnomaliesCommand d;
+                d.execute();
                 break;
             }
             case(4): {
+                displayCommand ds;
+                ds.execute();
                 break;
             }
             case(5): {

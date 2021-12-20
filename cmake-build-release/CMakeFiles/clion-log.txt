@@ -1,4 +1,13 @@
 /home/dabrant/clion-2021.2.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /home/dabrant/CLionProjects/advancedprogramming
 -- Configuring done
--- Generating done
--- Build files have been written to: /home/dabrant/CLionProjects/advancedprogramming/cmake-build-release
+CMake Error at CMakeLists.txt:6 (add_executable):
+  Cannot find source file:
+
+    HybridAnomalyDetector.h
+
+
+CMake Error at CMakeLists.txt:6 (add_executable):
+  No SOURCES given to target: untitled7
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.

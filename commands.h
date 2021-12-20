@@ -10,12 +10,9 @@
 #include <fstream>
 #include <vector>
 #include "HybridAnomalyDetector.h"
+#include "AnomalyDetector.h"
 
 using namespace std;
-TimeSeries trainTs;
-TimeSeries testTs;
-HybridAnomalyDetector ad;
-vector<AnomalyReport> r;
 
 class DefaultIO{
 public:
@@ -34,71 +31,103 @@ public:
 // you may edit this class
 class Command{
 	DefaultIO* dio;
+protected:
+    TimeSeries* trainTs;
+    TimeSeries* testTs;
+    HybridAnomalyDetector ad;
+    vector<AnomalyReport>* r;
 public:
 	Command(DefaultIO* dio):dio(dio){}
+    Command() {
+        TimeSeries* trainTs;
+        TimeSeries* testTs;
+        HybridAnomalyDetector ad;
+        vector<AnomalyReport>* r;
+    }
 	virtual void execute()=0;
 	virtual ~Command(){}
 };
 
 
-void detectAnomalies(){
-    ad.learnNormal(trainTs);
-    r = ad.detect(testTs);
-    std::cout << "anomaly detection complete." << std::endl;
-}
+class detectAnomaliesCommand:public Command {
+public:
+    virtual void execute() {
+        ad.learnNormal(*trainTs);
+        vector<AnomalyReport> tmp = ad.detect(*testTs);
+        r = &tmp;
+        std::cout << "anomaly detection complete." << std::endl;
+    }
+};
 
-void currentThreshold() {
-    std::cout << "The current correlation threshold is" << ad.getTopThreshold() << std::endl;
-    float newThreshold;
-    std::cin >> newThreshold;
-    while (newThreshold < 0 || newThreshold > 1) {
-        std::cout <<"please choose a value between 0 and 1." << std::endl;
+class currentThresholdCommand:public Command{
+public:
+    virtual void execute() {
+        std::cout << "The current correlation threshold is" << " " << ad.getTopThreshold() << std::endl;
+        float newThreshold;
         std::cin >> newThreshold;
+        while (newThreshold < 0 || newThreshold > 1) {
+            std::cout <<"please choose a value between 0 and 1." << std::endl;
+            std::cin >> newThreshold;
+        }
+        ad.setTopThreshold(newThreshold);
     }
-    ad.setTopThreshold(newThreshold);
-}
+};
 
-void uploadAtimeSeries() {
-    std::cout << "Please upload your local test CSV file." << std::endl;
-    std::ofstream serverFile("anomalyTrain.csv");
-    std::ifstream clientFile;
-    clientFile.open("trainFile.csv", ios::in);
-    serverFile.open("anomalyTrain.csv", ios::out);
-    string tp;
-    while (getline(clientFile, tp)) {
-        if (tp == "done")
-            break;
-        serverFile << tp;
+class uploadAtimeSeriesCommand:public Command{
+public:
+    virtual void execute() {
+        std::cout << "Please upload your local test CSV file." << std::endl;
+        std::ofstream serverFile("anomalyTrain.csv");
+        std::ifstream clientFile;
+        clientFile.open("trainFile.csv", ios::in);
+        serverFile.open("anomalyTrain.csv", ios::out);
+        string tp;
+        while (getline(clientFile, tp)) {
+            if (tp == "done")
+                break;
+            serverFile << tp;
+        }
+        serverFile.close();
+        clientFile.close();
+        TimeSeries tmp = TimeSeries("anomalyTrain.csv");
+        trainTs = &tmp;
+        std::cout << "Please upload your local train CSV file." << std::endl;
+        std::ofstream serverFile1("anomalyTest.csv");
+        std::ifstream clientFile1;
+        clientFile1.open("testFile.csv", ios::in);
+        serverFile1.open("anomalyTest.csv", ios::out);
+        while (getline(clientFile1, tp)) {
+            if (tp == "done")
+                break;
+            serverFile1 << tp;
+        }
+        std::cout << "Upload complete" << std::endl;
+        serverFile1.close();
+        clientFile1.close();
+        TimeSeries tmp2 = TimeSeries("anomalyTest.csv");
+        testTs = &tmp2;
     }
-    serverFile.close();
-    clientFile.close();
-    trainTs = TimeSeries("anomalyTrain.csv");
-    std::cout << "Please upload your local train CSV file." << std::endl;
-    std::ofstream serverFile1("anomalyTest.csv");
-    std::ifstream clientFile1;
-    clientFile1.open("testFile.csv", ios::in);
-    serverFile1.open("anomalyTest.csv", ios::out);
-    while (getline(clientFile1, tp)) {
-        if (tp == "done")
-            break;
-        serverFile1 << tp;
-    }
-    std::cout << "Upload complete" << std::endl;
-    serverFile1.close();
-    clientFile1.close();
-    testTs = TimeSeries("anomalyTest.csv");
-}
+};
 
 class displayCommand:public Command{
-    DefaultIO* dio;
 public:
     virtual void execute(){
-        for (AnomalyReport ar : r) {
-            std::cout << ar.timeStep + " " + ar.description << std::endl;
+        for (AnomalyReport ar : *r) {
+            std::cout << to_string(ar.timeStep) << " " << ar.description << std::endl;
         }
     }
 };
 
-
+class analyzeCommand:public Command{
+public:
+    virtual void execute(){
+        /*TODO - GET FILE FROM CLIENT*/
+        vector<pair<long, long>> sumAnomalies;
+        string desc;
+        for (AnomalyReport ar : *r) {
+            /*TODO - FIND ANOMALY IN RANGE*/
+        }
+    }
+};
 
 #endif /* COMMANDS_H_ */
