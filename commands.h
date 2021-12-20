@@ -50,37 +50,35 @@ class uploadAtimeSeriesCommand:public Command{
 public:
     uploadAtimeSeriesCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
                              vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
+
+
     virtual void execute() {
-        std::cout << "Please upload your local test CSV file." << std::endl;
+        string w = "Please upload your local test CSV file.\n";
+        dio->write(w);
         std::ofstream serverFile("anomalyTrain.csv");
-        std::ifstream clientFile;
-        clientFile.open("trainFile.csv", ios::in);
-        serverFile.open("anomalyTrain.csv", ios::out);
-        string tp;
-        while (getline(clientFile, tp)) {
-            if (tp == "done")
-                break;
-            serverFile << tp;
+        serverFile.open("anomalyTrain.csv");
+        string s = dio->read();
+        while (s != "done") {
+            serverFile << s + "\n";
+            s = dio->read();
         }
         serverFile.close();
-        clientFile.close();
-        TimeSeries tmp = TimeSeries("anomalyTrain.csv");
-        trainTs = &tmp;
-        std::cout << "Please upload your local train CSV file." << std::endl;
+        w = "Please upload your local test CSV file.\n";
+        dio->write(w);
         std::ofstream serverFile1("anomalyTest.csv");
-        std::ifstream clientFile1;
-        clientFile1.open("testFile.csv", ios::in);
-        serverFile1.open("anomalyTest.csv", ios::out);
-        while (getline(clientFile1, tp)) {
-            if (tp == "done")
-                break;
-            serverFile1 << tp;
+        serverFile.open("anomalyTest.csv");
+        s = dio->read();
+        while (s != "done") {
+            serverFile1 << s + "\n";
+            s = dio->read();
         }
-        std::cout << "Upload complete" << std::endl;
         serverFile1.close();
-        clientFile1.close();
-        TimeSeries tmp2 = TimeSeries("anomalyTest.csv");
-        testTs = &tmp2;
+        TimeSeries tmp = TimeSeries("anomalyTrain.csv");
+        this->trainTs = &tmp;
+        tmp = TimeSeries("anomalyTest.csv");
+        this->testTs = &tmp;
+        w = "Upload complete\n";
+        dio->write(w);
     }
 };
 
