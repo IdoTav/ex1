@@ -24,28 +24,29 @@ void printMenu() {
 void CLI::start(){
     printMenu();
     int i = 0;
+    int* N;
     while(true) {
         std::cin >> i;
         if (6 == i)
             break;
         switch (i) {
             case(1): {
-                uploadAtimeSeriesCommand t(dio, trainTs, testTs, ad, r);
+                uploadAtimeSeriesCommand t(dio, trainTs, testTs, ad, r, N);
                 t.execute();
                 break;
             }
             case(2): {
-                currentThresholdCommand c(dio, trainTs, testTs, ad, r);
+                currentThresholdCommand c(dio, trainTs, testTs, ad, r, N);
                 c.execute();
                 break;
             }
             case(3): {
-                detectAnomaliesCommand d(dio, trainTs, testTs, ad, r);
+                detectAnomaliesCommand d(dio, trainTs, testTs, ad, r, N);
                 d.execute();
                 break;
             }
             case(4): {
-                displayCommand ds (dio, trainTs, testTs, ad, r);
+                displayCommand ds (dio, trainTs, testTs, ad, r, N);
                 ds.execute();
                 break;
             }
