@@ -5,14 +5,14 @@ CLI::CLI(DefaultIO* dio) {
 
 
 void printMenu() {
-    std::cout<<"Welcome to the Anomaly Detection Server.\n"
+    std::cout << "Welcome to the Anomaly Detection Server.\n"
                "Please choose an option:\n"
                "1. upload a time series csv file\n"
                "2. algorithm settings\n"
                "3. detect anomalies\n"
                "4. display results\n"
                "5. upload anomalies and analyze results\n"
-               "6. exit"<<std::endl;
+               "6. exit" << std::endl;
 }
 
 void CLI::start(){
@@ -24,19 +24,22 @@ void CLI::start(){
             break;
         switch (i) {
             case(1): {
-                //UPLOAD A TIME SERIES CSV FILE
+                uploadAtimeSeries();
+                break;
             }
             case(2): {
-                //ALGORITHM SETTINGS
+                currentThreshold();
+                break;
             }
             case(3): {
-                //DETECT ANOMALIES
+                detectAnomalies();
+                break;
             }
             case(4): {
-                //DISPLAY RESULTS
+                break;
             }
-            case(4): {
-                //UPLOAD ANOMALIES AND ANALYZE RESULTS
+            case(5): {
+                break;
             }
         }
     }
