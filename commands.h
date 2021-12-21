@@ -36,10 +36,11 @@ protected:
     TimeSeries* testTs;
     HybridAnomalyDetector* ad;
     vector<AnomalyReport>* r;
+    int* N;
 public:
 	Command(DefaultIO* dio):dio(dio){}
     Command(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries* testTsC, HybridAnomalyDetector* adC,
-            vector<AnomalyReport>* rC):dio(dio), trainTs(trainTsC), testTs(testTsC), ad(adC), r(rC){}
+            vector<AnomalyReport>* rC, int* NC):dio(dio), trainTs(trainTsC), testTs(testTsC), ad(adC), r(rC), N(NC){}
     //Command(int l) {l = 6;}
 	virtual void execute()=0;
 	virtual ~Command(){}
@@ -49,36 +50,38 @@ public:
 class uploadAtimeSeriesCommand:public Command{
 public:
     uploadAtimeSeriesCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                             vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
-
-
+                             vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
     virtual void execute() {
-        string w = "Please upload your local test CSV file.\n";
-        dio->write(w);
+        std::cout << "Please upload your local test CSV file." << std::endl;
         std::ofstream serverFile("anomalyTrain.csv");
-        serverFile.open("anomalyTrain.csv");
-        string s = dio->read();
-        while (s != "done") {
-            serverFile << s + "\n";
-            s = dio->read();
+        std::ifstream clientFile;
+        clientFile.open("trainFile.csv", ios::in);
+        serverFile.open("anomalyTrain.csv", ios::out);
+        string tp;
+        while (getline(clientFile, tp)) {
+            if (tp == "done")
+                break;
+            serverFile << tp;
         }
         serverFile.close();
-        w = "Please upload your local test CSV file.\n";
-        dio->write(w);
-        std::ofstream serverFile1("anomalyTest.csv");
-        serverFile.open("anomalyTest.csv");
-        s = dio->read();
-        while (s != "done") {
-            serverFile1 << s + "\n";
-            s = dio->read();
-        }
-        serverFile1.close();
+        clientFile.close();
         TimeSeries tmp = TimeSeries("anomalyTrain.csv");
-        this->trainTs = &tmp;
-        tmp = TimeSeries("anomalyTest.csv");
-        this->testTs = &tmp;
-        w = "Upload complete\n";
-        dio->write(w);
+        trainTs = &tmp;
+        std::cout << "Please upload your local train CSV file." << std::endl;
+        std::ofstream serverFile1("anomalyTest.csv");
+        std::ifstream clientFile1;
+        clientFile1.open("testFile.csv", ios::in);
+        serverFile1.open("anomalyTest.csv", ios::out);
+        while (getline(clientFile1, tp)) {
+            if (tp == "done")
+                break;
+            serverFile1 << tp;
+        }
+        std::cout << "Upload complete" << std::endl;
+        serverFile1.close();
+        clientFile1.close();
+        TimeSeries tmp2 = TimeSeries("anomalyTest.csv");
+        testTs = &tmp2;
     }
 };
 
@@ -86,29 +89,25 @@ public:
 class detectAnomaliesCommand:public Command {
 public:
     detectAnomaliesCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                            vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
+                           vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
     virtual void execute() {
         (*ad).learnNormal(*trainTs);
         *r = (*ad).detect(*testTs);
-        string s = "anomaly detection complete.\n";
-        dio->write(s);
+        std::cout << "anomaly detection complete." << std::endl;
     }
 };
 
 class currentThresholdCommand:public Command{
 public:
     currentThresholdCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                            vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
+                            vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
     virtual void execute() {
-        string s = "The current correlation threshold is " + std::to_string(ad->getTopThreshold());
-        dio->write(s);
-        string threshold = dio->read();
-        float newThreshold = std::stof(threshold);
+        std::cout << "The current correlation threshold is" << " " << ad->getTopThreshold() << std::endl;
+        float newThreshold;
+        std::cin >> newThreshold;
         while (newThreshold < 0 || newThreshold > 1) {
-            s = "please choose a value between 0 and 1.\n";
-            dio->write(s);
-            threshold = dio->read();
-            newThreshold = std::stof(threshold);;
+            std::cout <<"please choose a value between 0 and 1." << std::endl;
+            std::cin >> newThreshold;
         }
         ad->setTopThreshold(newThreshold);
     }
@@ -117,11 +116,10 @@ public:
 class displayCommand:public Command{
 public:
     displayCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                   vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
+                   vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
     virtual void execute(){
         for (AnomalyReport ar : *r) {
-            string s = to_string(ar.timeStep) + " " + ar.description;
-            dio->write(s);
+            dio->write(to_string(ar.timeStep) + " " + ar.description);
         }
     }
 };
@@ -129,12 +127,14 @@ public:
 class analyzeCommand:public Command{
 public:
     analyzeCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                   vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
+                   vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
     virtual void execute(){
         // insert the client input to vector who holds the data
         vector<pair<int, int>> sumAnomalies;
         string s = dio->read();
+        int P = 0;
         while (s != "done") {
+            P += 1;
             stringstream rangeSplit(s);
             string num;
             vector<string> rangeNum;
@@ -147,27 +147,69 @@ public:
         // marge time steps reports
         vector<pair<long, long>> sumReports;
         string lastRep = " ";
-        int lastStep = 0;
+        long lastStep = 0;
         for (AnomalyReport ar: *r) {
+            // case the reports are close
             if (lastRep == ar.description) {
                 if(lastStep + 1 == ar.timeStep) {
                     long first = sumReports.back().first;
+                    //pop the last range and push new range
                     sumReports.pop_back();
                     sumReports.emplace_back(first, ar.timeStep);
+                } else {
+                    sumReports.emplace_back(ar.timeStep, ar.timeStep);
+                }
+            }
+            // case new description report
+            else {
+                sumReports.emplace_back(ar.timeStep, ar.timeStep);
+            }
+            lastStep = ar.timeStep;
+            lastRep = ar.description;
+        }
+        // find false positive reports.
+        float TP = 0, FP = 0;
+        for (auto rep: sumReports) {
+            int flag = 0;
+            for (auto ano: sumAnomalies) {
+                // case the report had shared time with the anomaly
+                if (rep.first <= ano.first && rep.second >= ano.first){
+                    break;
+                } else if (rep.first >= ano.first && rep.first <= ano.second){
+                    break;
+                }
+            }
+            // case we didn't break so the report is false
+            FP += 1;
+        }
+        // find true positive reports.
+        for (auto ano: sumAnomalies) {
+            int flag = 0;
+            for (auto rep: sumReports) {
+                // case the report had shared time with the anomaly
+                if (rep.first <= ano.first && rep.second >= ano.first){
+                    TP += 1;
+                    break;
+                } else if (rep.first >= ano.first && rep.first <= ano.second){
+                    TP += 1;
+                    break;
                 }
             }
         }
-        int TP = 0, FP = 0;
-        for (auto it: sumAnomalies) {
-            for (AnomalyReport ar: *r) {
-                if (ar.timeStep >= it.first) {
-                    if (ar.timeStep <= it.second){
-                        TP += 1;
-                        break;
-                    }
-                }
-            }
-        }
+        // write true positive rate
+        float tRate =(TP/P);
+        int tmpRate = tRate * 1000;
+        tRate = tmpRate / 1000;
+        dio->write("True Positive Rate: ");
+        dio->write(tRate);
+        dio->write("\n");
+        // write false positive rate
+        float nRate =(FP/(*N));
+        tmpRate = nRate * 1000;
+        nRate = tmpRate / 1000;
+        dio->write("False Positive Rate: ");
+        dio->write(nRate);
+        dio->write("\n");
     }
 };
 
