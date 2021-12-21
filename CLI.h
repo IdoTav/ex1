@@ -4,21 +4,25 @@
 #define CLI_H_
 
 #include <string.h>
-#include "commands.h"
+#include "HybridAnomalyDetector.h"
+#include "AnomalyDetector.h"
 
+class DefaultIO;
 using namespace std;
 
 class CLI {
 	DefaultIO* dio;
-	// you can add data members
-public:
     TimeSeries* trainTs;
     TimeSeries* testTs;
-    HybridAnomalyDetector* ad;
+    HybridAnomalyDetector ad;
     vector<AnomalyReport>* r;
+	// you can add data members
+public:
 	CLI(DefaultIO* dio);
 	void start();
-	virtual ~CLI();
+    void setTestTs(DefaultIO* dio);
+    void setTrainTs(DefaultIO* dio);
+    virtual ~CLI();
 };
 
 #endif /* CLI_H_ */
