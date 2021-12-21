@@ -36,8 +36,9 @@ public:
 
 class uploadAtimeSeriesCommand:public Command{
 public:
-    TimeSeries trainTs;
-    TimeSeries testTs;
+    TimeSeries _trainTs;
+    TimeSeries _testTs;
+    int _numlines = -1;
     uploadAtimeSeriesCommand(DefaultIO* dio) : Command(dio){}
     virtual void execute() {
         string s = "Please upload your local train CSV file.\n";
@@ -48,9 +49,10 @@ public:
         while (w != "done") {
             serverFile << w + "\n";
             w = _dio->read();
+            _numlines += 1;
         }
         serverFile.close();
-        this->trainTs = TimeSeries("anomalyTrain.csv");
+        this->_trainTs = TimeSeries("anomalyTrain.csv");
         s = "Please upload your local test CSV file.\n";
         _dio->write(s);
         std::ofstream serverFile1;
@@ -63,17 +65,17 @@ public:
         serverFile1.close();
         s = "Upload complete\n";
         _dio->write(s);
-        this->testTs = TimeSeries("anomalyTest.csv");
+        this->_testTs = TimeSeries("anomalyTest.csv");
     }
 };
 
 
 class currentThresholdCommand:public Command{
 public:
-    HybridAnomalyDetector ad;
+    HybridAnomalyDetector _ad;
     currentThresholdCommand(DefaultIO* dio) : Command(dio) {}
     virtual void execute(){
-        string s = "The current correlation threshold is " + to_string(ad.getTopThreshold()) + "\n";
+        string s = "The current correlation threshold is " + to_string(_ad.getTopThreshold()) + "\n";
         _dio->write(s);
         s = "Type a new threshold\n";
         _dio->write(s);
@@ -85,24 +87,34 @@ public:
             threshold = _dio->read();
             newThreshold = std::stof(threshold);
         }
-        ad.setTopThreshold(newThreshold);
+        _ad.setTopThreshold(newThreshold);
     }
 };
-/**
+
 class detectAnomaliesCommand:public Command {
 public:
-    vector<AnomalyReport> _r;
-    detectAnomaliesCommand(DefaultIO *dio1, DefaultIO *dio, vector<AnomalyReport> r) : Command(dio1) {
-            _r = r;
+    HybridAnomalyDetector* _ad;
+    vector <AnomalyReport> _ar;
+    TimeSeries _trainTs;
+    TimeSeries _testTs;
+    detectAnomaliesCommand(DefaultIO *dio, HybridAnomalyDetector* ad, TimeSeries trainTs, TimeSeries testTs) :
+    Command(dio) {
+            _ad = ad;
+            _trainTs = trainTs;
+            _testTs = testTs;
     }
     virtual void execute(){
-        ad->learnNormal(*trainTs);
-        _r = ad->detect(*testTs);
+        _ad->learnNormal(_trainTs);
+        vector<AnomalyReport> r = _ad->detect(_testTs);
+        unsigned long vectorSize = r.size();
+        for (int i = 0; i < vectorSize ; i ++) {
+            _ar.push_back(r[i]);
+        }
         string s = "anomaly detection complete.\n";
         _dio->write(s);
     }
 };
-
+/**
 class displayCommand:public Command{
     vector<AnomalyReport> _r;
 public:
