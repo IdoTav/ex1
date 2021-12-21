@@ -189,9 +189,10 @@ void CLI:: runAnalyze (DefaultIO* dio) {
 **/
 
 void CLI::start() {
-    TimeSeries tmp1, tmp;
+    TimeSeries trainTs, testTs;
     HybridAnomalyDetector ad;
-    int numlines = -1;
+    vector<AnomalyReport> ar;
+    int numlines;
     while (true) {
         printMenu(this->dio);
         string index = this->dio->read();
@@ -202,119 +203,122 @@ void CLI::start() {
             case (1): {
                 uploadAtimeSeriesCommand ex(dio);
                 ex.execute();
-                tmp1 = ex.testTs;
-                tmp = ex.trainTs;
+                testTs = ex._testTs;
+                trainTs = ex._trainTs;
+                numlines = ex._numlines;
                 break;
             }
             case (2): {
                 currentThresholdCommand ex(dio);
                 ex.execute();
-                ad = ex.ad;
+                ad = ex._ad;
                 break;
             }
-            /**
+
             case(3): {
-                ad.learnNormal(*trainTs);
-                ar = ad.detect(*testTs);
-                r = &ar;
-                string s = "anomaly detection complete.\n";
-                dio->write(s);
+                detectAnomaliesCommand ex(dio, &ad, trainTs, testTs);
+                ex.execute();
+                vector<AnomalyReport> r = ex._ar;
+                unsigned long vectorSize = r.size();
+                for (int i = 0; i < vectorSize ; i ++) {
+                    ar.push_back(r[i]);
+                }
                 break;
             }
-
-            case(4): {
-                for (AnomalyReport anoR : *r) {
-                    string s = to_string(anoR.timeStep) + "\t" + anoR.description + "\n";
+                /**
+                case(4): {
+                    for (AnomalyReport anoR : *ar) {
+                        string s = to_string(anoR.timeStep) + "\t" + anoR.description + "\n";
+                        dio->write(s);
+                    }
+                    string s = "Done.\n";
                     dio->write(s);
+                    break;
                 }
-                string s = "Done.\n";
-                dio->write(s);
-                break;
-            }
 
-            case(5): {
-                // insert the client input to vector who holds the data
-                string s = "Please upload your local anomalies file.\n";
-                dio->write(s);
-                vector<pair<int, int>> sumAnomalies;
-                string w = dio->read();
-                int P = 0;
-                while (w != "done") {
-                    P += 1;
-                    stringstream rangeSplit(w);
-                    string num;
-                    vector<string> rangeNum;
-                    while (getline(rangeSplit, num, ',')) {
-                        rangeNum.push_back(num);
-                    }
-                    sumAnomalies.emplace_back(stoi(rangeNum[0]), stoi(rangeNum[1]));
-                    w = dio->read();
-                }
-                s = "Upload complete.\n";
-                dio->write(s);
-                // marge time steps reports
-                vector<pair<long, long>> sumReports;
-                string lastRep = " ";
-                long lastStep = 0;
-                for (AnomalyReport ar: *r) {
-                    // case the reports are close
-                    if (lastRep == ar.description) {
-                        if(lastStep + 1 == ar.timeStep) {
-                            long first = sumReports.back().first;
-                            //pop the last range and push new range
-                            sumReports.pop_back();
-                            sumReports.emplace_back(first, ar.timeStep);
-                        } else {
-                            sumReports.emplace_back(ar.timeStep, ar.timeStep);
+                case(5): {
+                    // insert the client input to vector who holds the data
+                    string s = "Please upload your local anomalies file.\n";
+                    dio->write(s);
+                    vector<pair<int, int>> sumAnomalies;
+                    string w = dio->read();
+                    int P = 0;
+                    while (w != "done") {
+                        P += 1;
+                        stringstream rangeSplit(w);
+                        string num;
+                        vector<string> rangeNum;
+                        while (getline(rangeSplit, num, ',')) {
+                            rangeNum.push_back(num);
                         }
+                        sumAnomalies.emplace_back(stoi(rangeNum[0]), stoi(rangeNum[1]));
+                        w = dio->read();
                     }
-                        // case new description report
-                    else {
-                        sumReports.emplace_back(ar.timeStep, ar.timeStep);
-                    }
-                    lastStep = ar.timeStep;
-                    lastRep = ar.description;
-                }
-                // find false positive reports.
-                float TP = 0, FP = 0;
-                for (auto rep: sumReports) {
-                    int flag = 0;
-                    for (auto ano: sumAnomalies) {
-                        // case the report had shared time with the anomaly
-                        if (rep.first <= ano.first && rep.second >= ano.first){
-                            flag = 1;
-                        } else if (rep.first >= ano.first && rep.first <= ano.second){
-                            flag = 1;
+                    s = "Upload complete.\n";
+                    dio->write(s);
+                    // marge time steps reports
+                    vector<pair<long, long>> sumReports;
+                    string lastRep = " ";
+                    long lastStep = 0;
+                    for (AnomalyReport r: *ar) {
+                        // case the reports are close
+                        if (lastRep == r.description) {
+                            if(lastStep + 1 == r.timeStep) {
+                                long first = sumReports.back().first;
+                                //pop the last range and push new range
+                                sumReports.pop_back();
+                                sumReports.emplace_back(first, r.timeStep);
+                            } else {
+                                sumReports.emplace_back(r.timeStep, r.timeStep);
+                            }
                         }
+                            // case new description report
+                        else {
+                            sumReports.emplace_back(r.timeStep, r.timeStep);
+                        }
+                        lastStep = r.timeStep;
+                        lastRep = r.description;
                     }
-                    // case we didn't break so the report is false
-                    if (0 == flag)
-                        FP += 1;
-                }
-                // find true positive reports.
-                for (auto ano: sumAnomalies) {
-                    int flag = 0;
+                    // find false positive reports.
+                    float TP = 0, FP = 0;
                     for (auto rep: sumReports) {
-                        // case the report had shared time with the anomaly
-                        if (rep.first <= ano.first && rep.second >= ano.first){
-                            TP += 1;
-                            break;
-                        } else if (rep.first >= ano.first && rep.first <= ano.second){
-                            TP += 1;
-                            break;
+                        int flag = 0;
+                        for (auto ano: sumAnomalies) {
+                            // case the report had shared time with the anomaly
+                            if (rep.first <= ano.first && rep.second >= ano.first){
+                                flag = 1;
+                            } else if (rep.first >= ano.first && rep.first <= ano.second){
+                                flag = 1;
+                            }
+                        }
+                        // case we didn't break so the report is false
+                        if (0 == flag)
+                            FP += 1;
+                    }
+                    // find true positive reports.
+                    for (auto ano: sumAnomalies) {
+                        int flag = 0;
+                        for (auto rep: sumReports) {
+                            // case the report had shared time with the anomaly
+                            if (rep.first <= ano.first && rep.second >= ano.first){
+                                TP += 1;
+                                break;
+                            } else if (rep.first >= ano.first && rep.first <= ano.second){
+                                TP += 1;
+                                break;
+                            }
                         }
                     }
+                    int N = numlines;
+                    // write true positive rate
+                    float tRate =(TP/P);
+                    dio->write("True Positive Rate: " +  cutDecimal(tRate) + "\n");
+                    // write false positive rate
+                    float nRate =(FP/(N));
+                    dio->write("False Positive Rate: " + cutDecimal(nRate) + "\n");
+                    break;
                 }
-                int N = numlines;
-                // write true positive rate
-                float tRate =(TP/P);
-                dio->write("True Positive Rate: " +  cutDecimal(tRate) + "\n");
-                // write false positive rate
-                float nRate =(FP/(N));
-                dio->write("False Positive Rate: " + cutDecimal(nRate) + "\n");
-                break;
-            }
-            */
+                */
         }
     }
 }
