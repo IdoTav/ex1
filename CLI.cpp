@@ -51,6 +51,8 @@ void CLI::start(){
                 break;
             }
             case(5): {
+                analyzeCommand ds (dio, trainTs, testTs, ad, r);
+                ds.execute();
                 break;
             }
         }
@@ -61,4 +63,3 @@ void CLI::start(){
 
 CLI::~CLI() {
 }
-

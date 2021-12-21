@@ -16,13 +16,13 @@ using namespace std;
 
 class DefaultIO{
 public:
-	virtual string read()=0;
-	virtual void write(string text)=0;
-	virtual void write(float f)=0;
-	virtual void read(float* f)=0;
-	virtual ~DefaultIO(){}
+    virtual string read()=0;
+    virtual void write(string text)=0;
+    virtual void write(float f)=0;
+    virtual void read(float* f)=0;
+    virtual ~DefaultIO(){}
 
-	// you may add additional methods here
+    // you may add additional methods here
 };
 
 // you may add here helper classes
@@ -36,60 +36,55 @@ protected:
     TimeSeries* testTs;
     HybridAnomalyDetector* ad;
     vector<AnomalyReport>* r;
-    int* N;
 public:
-	Command(DefaultIO* dio):dio(dio){}
+    Command(DefaultIO* dio):dio(dio){}
     Command(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries* testTsC, HybridAnomalyDetector* adC,
-            vector<AnomalyReport>* rC, int* NC):dio(dio), trainTs(trainTsC), testTs(testTsC), ad(adC), r(rC), N(NC){}
+            vector<AnomalyReport>* rC):dio(dio), trainTs(trainTsC), testTs(testTsC), ad(adC), r(rC){}
     //Command(int l) {l = 6;}
-	virtual void execute()=0;
-	virtual ~Command(){}
+    virtual void execute()=0;
+    virtual ~Command(){}
 };
 
 
 class uploadAtimeSeriesCommand:public Command{
 public:
-    uploadAtimeSeriesCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                             vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
+    uploadAtimeSeriesCommand(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+                             vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
     virtual void execute() {
-        std::cout << "Please upload your local test CSV file." << std::endl;
-        std::ofstream serverFile("anomalyTrain.csv");
-        std::ifstream clientFile;
-        clientFile.open("trainFile.csv", ios::in);
-        serverFile.open("anomalyTrain.csv", ios::out);
-        string tp;
-        while (getline(clientFile, tp)) {
-            if (tp == "done")
-                break;
-            serverFile << tp;
+        string s = "Please upload your local train CSV file.\n";
+        dio->write(s);
+        std::fstream serverFile;
+        serverFile.open("anomalyTrain.csv", fstream ::app);
+        string w = dio->read();
+        while (w != "done") {
+            serverFile << w + "\n";
+            w = dio->read();
         }
         serverFile.close();
-        clientFile.close();
         TimeSeries tmp = TimeSeries("anomalyTrain.csv");
-        trainTs = &tmp;
-        std::cout << "Please upload your local train CSV file." << std::endl;
-        std::ofstream serverFile1("anomalyTest.csv");
-        std::ifstream clientFile1;
-        clientFile1.open("testFile.csv", ios::in);
-        serverFile1.open("anomalyTest.csv", ios::out);
-        while (getline(clientFile1, tp)) {
-            if (tp == "done")
-                break;
-            serverFile1 << tp;
+        *trainTs = tmp;
+        s = "Please upload your local test CSV file.\n";
+        dio->write(s);
+        std::ofstream serverFile1;
+        serverFile1.open("anomalyTest.csv", fstream ::app);
+        w = dio->read();
+        while (w != "done") {
+            serverFile1 << w + "\n";
+            w = dio->read();
         }
-        std::cout << "Upload complete" << std::endl;
         serverFile1.close();
-        clientFile1.close();
+        s = "Upload complete\n";
+        dio->write(s);
         TimeSeries tmp2 = TimeSeries("anomalyTest.csv");
-        testTs = &tmp2;
+        *testTs = tmp2;
     }
 };
 
 
 class detectAnomaliesCommand:public Command {
 public:
-    detectAnomaliesCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                           vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
+    detectAnomaliesCommand(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+                           vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
     virtual void execute() {
         (*ad).learnNormal(*trainTs);
         *r = (*ad).detect(*testTs);
@@ -99,15 +94,18 @@ public:
 
 class currentThresholdCommand:public Command{
 public:
-    currentThresholdCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                            vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
+    currentThresholdCommand(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+                            vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
     virtual void execute() {
-        std::cout << "The current correlation threshold is" << " " << ad->getTopThreshold() << std::endl;
-        float newThreshold;
-        std::cin >> newThreshold;
+        string s = "The current correlation threshold is " + to_string(ad->getTopThreshold()) + "\n";
+        dio->write(s);
+        string threshold = dio->read();
+        float newThreshold = std::stof(threshold);
         while (newThreshold < 0 || newThreshold > 1) {
-            std::cout <<"please choose a value between 0 and 1." << std::endl;
-            std::cin >> newThreshold;
+            s = "please choose a value between 0 and 1.\n";
+            dio->write(s);
+            threshold = dio->read();
+            newThreshold = std::stof(threshold);
         }
         ad->setTopThreshold(newThreshold);
     }
@@ -115,11 +113,12 @@ public:
 
 class displayCommand:public Command{
 public:
-    displayCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                   vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
+    displayCommand(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+                   vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
     virtual void execute(){
         for (AnomalyReport ar : *r) {
-            dio->write(to_string(ar.timeStep) + " " + ar.description);
+            string s = to_string(ar.timeStep) + " " + ar.description + "\n";
+            dio->write(s);
         }
     }
 };
@@ -127,7 +126,7 @@ public:
 class analyzeCommand:public Command{
 public:
     analyzeCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                   vector<AnomalyReport> *rC, int* NC) : Command(dio, trainTsC, testTsC, adC, rC, NC) {}
+                   vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
     virtual void execute(){
         // insert the client input to vector who holds the data
         vector<pair<int, int>> sumAnomalies;
@@ -160,7 +159,7 @@ public:
                     sumReports.emplace_back(ar.timeStep, ar.timeStep);
                 }
             }
-            // case new description report
+                // case new description report
             else {
                 sumReports.emplace_back(ar.timeStep, ar.timeStep);
             }
@@ -196,6 +195,8 @@ public:
                 }
             }
         }
+        /* TODO CHANGE N*/
+        int N = 4;
         // write true positive rate
         float tRate =(TP/P);
         int tmpRate = tRate * 1000;
@@ -204,7 +205,7 @@ public:
         dio->write(tRate);
         dio->write("\n");
         // write false positive rate
-        float nRate =(FP/(*N));
+        float nRate =(FP/(N));
         tmpRate = nRate * 1000;
         nRate = tmpRate / 1000;
         dio->write("False Positive Rate: ");
