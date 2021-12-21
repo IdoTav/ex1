@@ -52,7 +52,7 @@ void CLI::setTrainTs(DefaultIO *dio) {
     }
     serverFile.close();
     TimeSeries tmp = TimeSeries("anomalyTrain.csv");
-    *trainTs = tmp;
+    this->trainTs = &tmp;
 }
 
 void CLI::setTestTs (DefaultIO* dio) {
@@ -69,7 +69,7 @@ void CLI::setTestTs (DefaultIO* dio) {
     s = "Upload complete\n";
     dio->write(s);
     TimeSeries tmp = TimeSeries("anomalyTest.csv");
-    testTs = &tmp;
+    this->testTs = &tmp;
 }
 
 void CLI::setSettings (DefaultIO* dio) {
@@ -91,7 +91,7 @@ void CLI::setSettings (DefaultIO* dio) {
 void CLI::runDetect (DefaultIO* dio) {
     this->ad.learnNormal(*trainTs);
     vector <AnomalyReport> ar = ad.detect(*testTs);
-    r = &ar;
+    this->r = &ar;
     string s = "anomaly detection complete.\n";
     dio->write(s);
 }
