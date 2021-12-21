@@ -12,10 +12,6 @@ using namespace std;
 
 class CLI {
 	DefaultIO* dio;
-    TimeSeries* trainTs;
-    TimeSeries* testTs;
-    HybridAnomalyDetector ad;
-    vector<AnomalyReport>* r;
 	// you can add data members
 public:
 	CLI(DefaultIO* dio);

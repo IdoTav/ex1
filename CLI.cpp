@@ -3,7 +3,6 @@
 
 CLI::CLI(DefaultIO* dio) {
     this->dio = dio;
-    this->ad = HybridAnomalyDetector();
 }
 
 
@@ -39,7 +38,7 @@ string cutDecimal (float f) {
         return "0." + to_string(comp);
     }
 }
-
+/**
 void CLI::setTrainTs(DefaultIO *dio) {
     string s = "Please upload your local train CSV file.\n";
     dio->write(s);
@@ -178,7 +177,7 @@ void CLI:: runAnalyze (DefaultIO* dio) {
             }
         }
     }
-    /** TODO CHANGE N*/
+    //TODO CHANGE N
     int N = 1;
     // write true positive rate
     float tRate =(TP/P);
@@ -187,67 +186,33 @@ void CLI:: runAnalyze (DefaultIO* dio) {
     float nRate =(FP/(N));
     dio->write("False Positive Rate: " + cutDecimal(nRate) + "\n");
 }
+**/
 
-
-void CLI::start(){
+void CLI::start() {
     TimeSeries tmp1, tmp;
-    vector<AnomalyReport> ar;
+    HybridAnomalyDetector ad;
     int numlines = -1;
-    while(true) {
+    while (true) {
         printMenu(this->dio);
         string index = this->dio->read();
         int i = stoi(index);
         if (6 == i)
             break;
         switch (i) {
-            case(1): {
-                string s = "Please upload your local train CSV file.\n";
-                dio->write(s);
-                std::fstream serverFile;
-                serverFile.open("anomalyTrain.csv", fstream ::app);
-                string w = dio->read();
-                while (w != "done") {
-                    serverFile << w + "\n";
-                    w = dio->read();
-                    numlines += 1;
-                }
-                serverFile.close();
-                s = "Upload complete.\n";
-                dio->write(s);
-                tmp = TimeSeries("anomalyTrain.csv");
-                trainTs = &tmp;
-                s = "Please upload your local test CSV file.\n";
-                dio->write(s);
-                std::fstream serverFile1;
-                serverFile1.open("anomalyTest.csv", fstream ::app);
-                w = dio->read();
-                while (w != "done") {
-                    serverFile1 << w + "\n";
-                    w = dio->read();
-                }
-                serverFile1.close();
-                s = "Upload complete.\n";
-                dio->write(s);
-                tmp1 = TimeSeries("anomalyTest.csv");
-                testTs = &tmp1;
+            case (1): {
+                uploadAtimeSeriesCommand ex(dio);
+                ex.execute();
+                tmp1 = ex.testTs;
+                tmp = ex.trainTs;
                 break;
             }
-            case(2): {
-                string s = "The current correlation threshold is " + to_string(ad.getTopThreshold()) + "\n";
-                dio->write(s);
-                s = "Type a new threshold\n";
-                dio->write(s);
-                string threshold = dio->read();
-                float newThreshold = std::stof(threshold);
-                while (newThreshold < 0 || newThreshold > 1) {
-                    s = "please choose a value between 0 and 1.\n";
-                    dio->write(s);
-                    threshold = dio->read();
-                    newThreshold = std::stof(threshold);
-                }
-                ad.setTopThreshold(newThreshold);
+            case (2): {
+                currentThresholdCommand ex(dio);
+                ex.execute();
+                ad = ex.ad;
                 break;
             }
+            /**
             case(3): {
                 ad.learnNormal(*trainTs);
                 ar = ad.detect(*testTs);
@@ -256,6 +221,7 @@ void CLI::start(){
                 dio->write(s);
                 break;
             }
+
             case(4): {
                 for (AnomalyReport anoR : *r) {
                     string s = to_string(anoR.timeStep) + "\t" + anoR.description + "\n";
@@ -265,6 +231,7 @@ void CLI::start(){
                 dio->write(s);
                 break;
             }
+
             case(5): {
                 // insert the client input to vector who holds the data
                 string s = "Please upload your local anomalies file.\n";
@@ -341,22 +308,15 @@ void CLI::start(){
                 int N = numlines;
                 // write true positive rate
                 float tRate =(TP/P);
-                /**
-                int tmpRate = tRate * 1000;
-                tRate = (float) tmpRate / 1000;**/
                 dio->write("True Positive Rate: " +  cutDecimal(tRate) + "\n");
                 // write false positive rate
                 float nRate =(FP/(N));
-                /**
-                tmpRate = nRate * 1000;
-                nRate = (float) tmpRate / 1000;
-                 **/
                 dio->write("False Positive Rate: " + cutDecimal(nRate) + "\n");
                 break;
             }
+            */
         }
     }
-
 }
 
 CLI::~CLI() {

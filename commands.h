@@ -5,7 +5,6 @@
 
 #include<iostream>
 #include <string.h>
-
 #include <fstream>
 #include <vector>
 #include "HybridAnomalyDetector.h"
@@ -15,30 +14,21 @@
 using namespace std;
 class DefaultIO{
 public:
+
+
     virtual string read()=0;
     virtual void write(string text)=0;
     virtual void write(float f)=0;
     virtual void read(float* f)=0;
     virtual ~DefaultIO(){}
 
-    // you may add additional methods here
 };
 
-// you may add here helper classes
-
-
-// you may edit this class
 class Command{
 protected:
-    DefaultIO* dio;
-    CLI* _cli;
-    TimeSeries* trainTs;
-    TimeSeries* testTs;
-    HybridAnomalyDetector* ad;
-    vector<AnomalyReport>* r;
+    DefaultIO* _dio;
 public:
-    Command(DefaultIO* dio):dio(dio){}
-    Command(DefaultIO* dio, CLI* cli):dio(dio), _cli(cli){}
+    Command(DefaultIO* dio):_dio(dio){}
     virtual void execute()=0;
     virtual ~Command(){}
 };
@@ -46,44 +36,94 @@ public:
 
 class uploadAtimeSeriesCommand:public Command{
 public:
-    uploadAtimeSeriesCommand(DefaultIO* dio, CLI* cli) : Command(dio, cli) {}
+    TimeSeries trainTs;
+    TimeSeries testTs;
+    uploadAtimeSeriesCommand(DefaultIO* dio) : Command(dio){}
     virtual void execute() {
-        this->_cli->setTrainTs(this->dio);
-        this->_cli->setTestTs(this->dio);
+        string s = "Please upload your local train CSV file.\n";
+        _dio->write(s);
+        std::fstream serverFile;
+        serverFile.open("anomalyTrain.csv", fstream ::app);
+        string w = _dio->read();
+        while (w != "done") {
+            serverFile << w + "\n";
+            w = _dio->read();
+        }
+        serverFile.close();
+        this->trainTs = TimeSeries("anomalyTrain.csv");
+        s = "Please upload your local test CSV file.\n";
+        _dio->write(s);
+        std::ofstream serverFile1;
+        serverFile1.open("anomalyTest.csv", fstream ::app);
+        w = _dio->read();
+        while (w != "done") {
+            serverFile1 << w + "\n";
+            w = _dio->read();
+        }
+        serverFile1.close();
+        s = "Upload complete\n";
+        _dio->write(s);
+        this->testTs = TimeSeries("anomalyTest.csv");
     }
 };
 
-
-class detectAnomaliesCommand:public Command {
-public:
-    detectAnomaliesCommand(DefaultIO* dio, CLI* cli) : Command(dio, cli) {}
-    virtual void execute(){
-        this->_cli->runDetect(dio);
-    }
-};
 
 class currentThresholdCommand:public Command{
 public:
-    currentThresholdCommand(DefaultIO* dio, CLI* cli) : Command(dio, cli) {}
+    HybridAnomalyDetector ad;
+    currentThresholdCommand(DefaultIO* dio) : Command(dio) {}
     virtual void execute(){
-        this->_cli->setSettings(dio);
+        string s = "The current correlation threshold is " + to_string(ad.getTopThreshold()) + "\n";
+        _dio->write(s);
+        s = "Type a new threshold\n";
+        _dio->write(s);
+        string threshold = _dio->read();
+        float newThreshold = std::stof(threshold);
+        while (newThreshold < 0 || newThreshold > 1) {
+            s = "please choose a value between 0 and 1.\n";
+            _dio->write(s);
+            threshold = _dio->read();
+            newThreshold = std::stof(threshold);
+        }
+        ad.setTopThreshold(newThreshold);
+    }
+};
+/**
+class detectAnomaliesCommand:public Command {
+public:
+    vector<AnomalyReport> _r;
+    detectAnomaliesCommand(DefaultIO *dio1, DefaultIO *dio, vector<AnomalyReport> r) : Command(dio1) {
+            _r = r;
+    }
+    virtual void execute(){
+        ad->learnNormal(*trainTs);
+        _r = ad->detect(*testTs);
+        string s = "anomaly detection complete.\n";
+        _dio->write(s);
     }
 };
 
 class displayCommand:public Command{
+    vector<AnomalyReport> _r;
 public:
-    displayCommand(DefaultIO* dio, CLI* cli) : Command(dio, cli) {}
+    displayCommand(DefaultIO *dio1, DefaultIO *dio, vector<AnomalyReport> r) : Command(dio1) {
+        _r = r;
+    }
     virtual void execute(){
-        this->_cli->runDisplay(dio);
+        ad->learnNormal(*trainTs);
+        _r = ad->detect(*testTs);
+        string s = "anomaly detection complete.\n";
+        _dio->write(s);
     }
 };
 
 class analyzeCommand:public Command{
 public:
-    analyzeCommand(DefaultIO* dio, CLI* cli) : Command(dio, cli) {}
+    analyzeCommand(DefaultIO* dio) : Command(dio) {}
     virtual void execute(){
-        this->_cli->runAnalyze(dio);
+
     }
 };
 
+*/
 #endif /* COMMANDS_H_ */
