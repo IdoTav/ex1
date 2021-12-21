@@ -11,9 +11,9 @@
 #include <vector>
 #include "HybridAnomalyDetector.h"
 #include "AnomalyDetector.h"
+#include "CLI.h"
 
 using namespace std;
-
 class DefaultIO{
 public:
     virtual string read()=0;
@@ -32,12 +32,14 @@ public:
 class Command{
 protected:
     DefaultIO* dio;
+    CLI* _cli;
     TimeSeries* trainTs;
     TimeSeries* testTs;
     HybridAnomalyDetector* ad;
     vector<AnomalyReport>* r;
 public:
     Command(DefaultIO* dio):dio(dio){}
+    Command(DefaultIO* dio, CLI* cli):dio(dio), _cli(cli){}
     Command(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries* testTsC, HybridAnomalyDetector* adC,
             vector<AnomalyReport>* rC):dio(dio), trainTs(trainTsC), testTs(testTsC), ad(adC), r(rC){}
     //Command(int l) {l = 6;}
@@ -48,35 +50,10 @@ public:
 
 class uploadAtimeSeriesCommand:public Command{
 public:
-    uploadAtimeSeriesCommand(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
-                             vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
+    uploadAtimeSeriesCommand(DefaultIO* dio, CLI* cli) : Command(dio, cli) {}
     virtual void execute() {
-        string s = "Please upload your local train CSV file.\n";
-        dio->write(s);
-        std::fstream serverFile;
-        serverFile.open("anomalyTrain.csv", fstream ::app);
-        string w = dio->read();
-        while (w != "done") {
-            serverFile << w + "\n";
-            w = dio->read();
-        }
-        serverFile.close();
-        TimeSeries tmp = TimeSeries("anomalyTrain.csv");
-        *trainTs = tmp;
-        s = "Please upload your local test CSV file.\n";
-        dio->write(s);
-        std::ofstream serverFile1;
-        serverFile1.open("anomalyTest.csv", fstream ::app);
-        w = dio->read();
-        while (w != "done") {
-            serverFile1 << w + "\n";
-            w = dio->read();
-        }
-        serverFile1.close();
-        s = "Upload complete\n";
-        dio->write(s);
-        TimeSeries tmp2 = TimeSeries("anomalyTest.csv");
-        *testTs = tmp2;
+        this->_cli->setTrainTs(this->dio);
+        this->_cli->setTestTs(this->dio);
     }
 };
 
@@ -125,7 +102,7 @@ public:
 
 class analyzeCommand:public Command{
 public:
-    analyzeCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
+    analyzeCommand(DefaultIO* dio, TimeSeries* trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
                    vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
     virtual void execute(){
         // insert the client input to vector who holds the data
