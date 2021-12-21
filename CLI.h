@@ -22,6 +22,10 @@ public:
 	void start();
     void setTestTs(DefaultIO* dio);
     void setTrainTs(DefaultIO* dio);
+    void setSettings(DefaultIO* dio);
+    void runDetect(DefaultIO* dio);
+    void runDisplay(DefaultIO* dio);
+    void runAnalyze(DefaultIO* dio);
     virtual ~CLI();
 };
 
