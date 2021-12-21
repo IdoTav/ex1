@@ -90,7 +90,8 @@ public:
     virtual void execute() {
         (*ad).learnNormal(*trainTs);
         *r = (*ad).detect(*testTs);
-        std::cout << "anomaly detection complete." << std::endl;
+        string s = "anomaly detection complete.\n";
+        dio->write(s);
     }
 };
 
@@ -99,12 +100,15 @@ public:
     currentThresholdCommand(DefaultIO* dio, TimeSeries *trainTsC, TimeSeries *testTsC, HybridAnomalyDetector* adC,
                             vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
     virtual void execute() {
-        std::cout << "The current correlation threshold is" << " " << ad->getTopThreshold() << std::endl;
-        float newThreshold;
-        std::cin >> newThreshold;
+        string s = "The current correlation threshold is " + std::to_string(ad->getTopThreshold());
+        dio->write(s);
+        string threshold = dio->read();
+        float newThreshold = std::stof(threshold);
         while (newThreshold < 0 || newThreshold > 1) {
-            std::cout <<"please choose a value between 0 and 1." << std::endl;
-            std::cin >> newThreshold;
+            s = "please choose a value between 0 and 1.\n";
+            dio->write(s);
+            threshold = dio->read();
+            newThreshold = std::stof(threshold);;
         }
         ad->setTopThreshold(newThreshold);
     }
@@ -116,7 +120,8 @@ public:
                    vector<AnomalyReport> *rC) : Command(dio, trainTsC, testTsC, adC, rC) {}
     virtual void execute(){
         for (AnomalyReport ar : *r) {
-            std::cout << to_string(ar.timeStep) << " " << ar.description << std::endl;
+            string s = to_string(ar.timeStep) + " " + ar.description;
+            dio->write(s);
         }
     }
 };
