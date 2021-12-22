@@ -159,7 +159,9 @@ class currentThresholdCommand : public Command {
 public:
     HybridAnomalyDetector _ad;
 
-    currentThresholdCommand(DefaultIO *dio) : Command(dio) {}
+    currentThresholdCommand(DefaultIO *dio, HybridAnomalyDetector ad) : Command(dio) {
+        _ad.setTopThreshold(ad.getTopThreshold());
+    }
 
     /**
 * this function execute the given command, printing and chaning the threshold
@@ -171,8 +173,10 @@ public:
         string threshold = _dio->read();
         float newThreshold = std::stof(threshold);
         //check if the threshold is valid
-        while (newThreshold < 0 || newThreshold > 1) {
+        while (newThreshold <= 0 || newThreshold >= 1) {
             _dio->write("please choose a value between 0 and 1.\n");
+            _dio->write("The current correlation threshold is " + cutDecimal(_ad.getTopThreshold()) + "\n");
+            _dio->write("Type a new threshold\n");
             threshold = _dio->read();
             newThreshold = std::stof(threshold);
         }
@@ -196,14 +200,16 @@ public:
     }
 
     /**
-* this function execute the given command, to detect the anomalies
-*/
+    * this function execute the given command, to detect the anomalies
+    */
     virtual void execute() {
         //calls t learnNormal method
         _ad->learnNormal(_trainTs);
         //calls the detect method
         vector<AnomalyReport> r = _ad->detect(_testTs);
         unsigned long vectorSize = r.size();
+        if (!_ar.empty())
+            _ar.clear();
         for (int i = 0; i < vectorSize; i++)
             _ar.push_back(r[i]);
         _dio->write("anomaly detection complete.\n");

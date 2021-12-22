@@ -147,14 +147,30 @@ vector<AnomalyReport> SimpleAnomalyDetector::detect(const TimeSeries& ts) {
                     string desc = cf[j].feature1 + "-" + cf[j].feature2;
                     AnomalyReport ar(desc, i + 1);
                     //add the anomaly to the anomaly reports
-                    arVector.push_back(ar);
+                    int flag = 0;
+                    for (auto vec = arVector.begin(); vec != arVector.end(); vec++){
+                        if (vec->description == ar.description && vec->timeStep == ar.timeStep) {
+                            flag = 1;
+                            break;
+                        }
+                    }
+                    if (flag == 0)
+                        arVector.push_back(ar);
                 }
             } else {
                 if (1.1 * cf[j].min_cir.radius < find_the_distance(p, cf[j].min_cir.center)) {
                     string desc = cf[j].feature1 + "-" + cf[j].feature2;
                     AnomalyReport ar(desc, i + 1);
                     //add the anomaly to the anomaly reports
-                    arVector.push_back(ar);
+                    int flag = 0;
+                    for (auto vec = arVector.begin(); vec != arVector.end(); vec++){
+                        if (vec->description == ar.description && vec->timeStep == ar.timeStep) {
+                            flag = 1;
+                            break;
+                        }
+                    }
+                    if (flag == 0)
+                        arVector.push_back(ar);
                 }
             }
             j++;

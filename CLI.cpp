@@ -46,7 +46,7 @@ void CLI::start() {
                 break;
             }
             case (2): {
-                currentThresholdCommand ex(dio);
+                currentThresholdCommand ex(dio, ad);
                 ex.execute();
                 ad = ex._ad;
                 break;
@@ -56,6 +56,8 @@ void CLI::start() {
                 ex.execute();
                 vector<AnomalyReport> r = ex._ar;
                 unsigned long vectorSize = r.size();
+                if (!ar.empty())
+                    ar.clear();
                 for (int i = 0; i < vectorSize; i++)
                     ar.push_back(r[i]);
                 break;
