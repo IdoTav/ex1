@@ -312,6 +312,7 @@ public:
                 FP += 1;
         }
         // find true positive reports.
+        int countAno = 0;
         for (auto ano: sumAnomalies) {
             int flag = 0;
             for (auto rep: sumReports) {
@@ -324,13 +325,14 @@ public:
                     break;
                 }
             }
+            countAno += ano.second- ano.first + 1;
         }
-        int N = _numLine;
+        int N = _numLine - countAno;
         // write true positive rate
         float tRate = (TP / P);
         _dio->write("True Positive Rate: " + cutDecimal(tRate) + "\n");
         // write false positive rate
-        float nRate = (FP / (N));
+        float nRate = (FP / N);
         _dio->write("False Positive Rate: " + cutDecimal(nRate) + "\n");
     }
 };
