@@ -16,6 +16,11 @@
 
 using namespace std;
 
+struct anoRep {
+    string description;
+    long timeStep;
+};
+
 class DefaultIO {
 public:
 
@@ -36,9 +41,48 @@ protected:
     DefaultIO *_dio;
 public:
     Command(DefaultIO *dio) : _dio(dio) {}
-    /**
+
+    void MergeSortedIntervals(vector<anoRep> &ar, int s, int m, int e) {
+        vector<anoRep> temp;
+        int i, j;
+        i = s;
+        j = m + 1;
+        while (i <= m && j <= e) {
+            if (ar[i].description <= ar[j].description) {
+                temp.push_back(ar[i]);
+                ++i;
+            } else {
+                temp.push_back(ar[j]);
+                ++j;
+            }
+        }
+        while (i <= m) {
+            temp.push_back(ar[i]);
+            ++i;
+        }
+        while (j <= e) {
+            temp.push_back(ar[j]);
+            ++j;
+        }
+        for (int i = s; i <= e; ++i)
+            ar[i] = temp[i - s];
+    }
+
+
+    void MergeSort(vector<anoRep> &ar, unsigned long s, unsigned long e) {
+        vector<AnomalyReport> sortedVector;
+        if (s < e) {
+            int m = (s + e) / 2;
+            MergeSort(ar, s, m);
+            MergeSort(ar, m + 1, e);
+            MergeSortedIntervals(ar, s, m, e);
+        }
+    }
+
+
+/**
 * this function prints only 3 numbers after the decimal point
- * @param f, a float variable that we want to print only the 3 numbers after the decimal point
+* @param f, a float variable that we want to print only the 3 numbers after the decimal point
 */
     string cutDecimal(float f) {
         if (1 == f)
@@ -62,9 +106,13 @@ public:
             return "0." + to_string(comp);
         }
     }
+
     virtual void execute() = 0;
 
-    virtual ~Command() {}
+    virtual ~
+
+    Command() {}
+
 };
 
 class uploadAtimeSeriesCommand : public Command {
@@ -169,12 +217,21 @@ public:
     displayResult(DefaultIO *dio, vector<AnomalyReport> *ar) : Command(dio) {
         _ar = ar;
     }
+
     /**
 * this function execute the given command, to display the results
 */
     virtual void execute() {
+        vector<anoRep> sortedVector;
+        for (AnomalyReport anoR: *_ar) {
+            anoRep aR;
+            aR.description = anoR.description;
+            aR.timeStep = anoR.timeStep;
+            sortedVector.push_back(aR);
+        }
+        MergeSort(sortedVector, 0, sortedVector.size() - 1);
         //goes all over the anomaly reports and prints the time step and the description
-        for (AnomalyReport anoR: *_ar)
+        for (anoRep anoR: sortedVector)
             _dio->write(to_string(anoR.timeStep) + "\t" + anoR.description + "\n");
         _dio->write("Done.\n");
     }
