@@ -2,6 +2,8 @@
 //Tal Dabran 316040898
 #include <iostream>
 #include <fstream>
+#include <sys/socket.h>
+
 
 #ifndef COMMANDS_H_
 #define COMMANDS_H_
@@ -28,49 +30,8 @@ public:
 
     virtual void write(string text) = 0;
 
-    virtual void write(float f) = 0;
-
-    virtual void read(float *f) = 0;
-
     virtual ~DefaultIO() {}
 
-};
-
-
-class NewIO:public DefaultIO{
-    ifstream in;
-    ofstream out;
-public:
-    NewIO(string inputFile,string outputFile){
-        in.open(inputFile);
-        out.open(outputFile);
-    }
-    virtual string read(){
-        string s;
-        in>>s;
-        return s;
-    }
-    virtual void write(string text){
-        out<<text;
-    }
-
-    virtual void write(float f){
-        out<<f;
-    }
-
-    virtual void read(float* f){
-        in>>*f;
-    }
-
-    void close(){
-        if(in.is_open())
-            in.close();
-        if(out.is_open())
-            out.close();
-    }
-    ~NewIO(){
-        close();
-    }
 };
 
 class Command {

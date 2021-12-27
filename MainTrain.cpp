@@ -49,7 +49,6 @@ int initClient(int port)throw (const char*){
     int serverFD, n;
     struct sockaddr_in serv_addr;
     struct hostent *server;
-
     serverFD = socket(AF_INET, SOCK_STREAM, 0);
     if (serverFD < 0) 
         throw "socket problem";
@@ -64,7 +63,6 @@ int initClient(int port)throw (const char*){
     serv_addr.sin_port = htons(port);
     if (connect(serverFD,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
 		throw "connection problem";
-		
     return serverFD;	
 }
 
