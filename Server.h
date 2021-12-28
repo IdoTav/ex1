@@ -47,7 +47,7 @@ public:
 
 // edit your ClientHandler interface here:
 class ClientHandler{
-    public:
+public:
     virtual void handle(int clientID)=0;
 };
 
@@ -57,7 +57,7 @@ class ClientHandler{
 
 // edit your AnomalyDetectionHandler class here
 class AnomalyDetectionHandler:public ClientHandler{
-	public:
+public:
     virtual void handle(int clientID){
     }
 };
@@ -66,10 +66,10 @@ class AnomalyDetectionHandler:public ClientHandler{
 // implement on Server.cpp
 class Server {
     int sfd, nsfd;
-	// you may add data members
+    // you may add data members
 
 public:
-	Server(int port) throw (const char*){
+    Server(int port) throw (const char*){
         socklen_t clilen;
         char buffer[256];
         struct sockaddr_in serv_addr, cli_addr;
@@ -83,7 +83,7 @@ public:
         serv_addr.sin_port = htons(port);
         if (bind(sfd, (struct sockaddr *) &serv_addr,
                  sizeof(serv_addr)) < 0)
-        cout<<("ERROR on binding")<<endl;
+            cout<<("ERROR on binding")<<endl;
         listen(sfd, 5);
         clilen = sizeof(cli_addr);
         nsfd = accept(sfd,
@@ -92,11 +92,8 @@ public:
             cout<<("ERROR on accept")<<endl;
     }
     void stop();
-	virtual ~Server();
-	void start(ClientHandler& ch)throw(const char*) {
-        NewIO nio(sfd, nsfd);
-        CLI cli(&nio);
-    }
+    virtual ~Server();
+    void start(ClientHandler& ch)throw(const char*);
 };
 
 #endif /* SERVER_H_ */

@@ -107,10 +107,7 @@ public:
 
     virtual void execute() = 0;
 
-    virtual ~
-
-    Command() {}
-
+    virtual ~Command() {}
 };
 
 class uploadAtimeSeriesCommand : public Command {
