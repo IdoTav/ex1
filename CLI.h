@@ -15,7 +15,10 @@ class CLI {
 	// you can add data members
 public:
 	CLI(DefaultIO* dio);
-	void start();
+
+    CLI();
+
+    void start();
     void setTestTs(DefaultIO* dio);
     void setTrainTs(DefaultIO* dio);
     void setSettings(DefaultIO* dio);

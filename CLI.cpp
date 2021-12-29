@@ -33,6 +33,8 @@ void CLI::start() {
     while (true) {
         printMenu(this->dio);
         string index = this->dio->read();
+        if (index == "\n")
+            index = this->dio->read();
         int i = stoi(index);
         if (6 == i)
             break;

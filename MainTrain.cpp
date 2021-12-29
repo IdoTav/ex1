@@ -4,9 +4,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <pthread.h>
-#include <thread>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -149,7 +146,7 @@ int main(){
 		Server server(port);
 		server.start(adh); // runs on its own thread
 		// let's run 2 clients
-		clientSide1(port,outputFile1);
+		//clientSide1(port,outputFile1);
 		clientSide2(port,outputFile2);
 		server.stop(); // joins the server's thread
 	}catch(const char* s){
