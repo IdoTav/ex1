@@ -72,6 +72,9 @@ void CLI::start() {
                 ex.execute();
                 break;
             }
+            default: {
+                break;
+            }
         }
     }
 }
