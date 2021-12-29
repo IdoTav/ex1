@@ -4,7 +4,7 @@
 void Server::runStart() {
     while (!stopping) {
         socklen_t clilen = sizeof(cli_addr);
-        alarm(1);
+        alarm(3);
         int nsfd = accept(sfd, (struct sockaddr *) &cli_addr, &clilen);
         if (nsfd > 0) {
             NewIO nio(sfd, nsfd);

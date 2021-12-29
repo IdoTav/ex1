@@ -22,16 +22,18 @@ public:
         _nsfd = nsfd;
     }
     virtual string read(){
-        char buffer[256];
+        char buffer[2560];
         int n;
-        bzero(buffer,256);
-        n = ::read(_nsfd, buffer, 255);
+        bzero(buffer,2560);
+        n = ::read(_nsfd, buffer, 2559);
         if (n < 0)
             cout<<("ERROR reading from socket")<<endl;
         return buffer;
     }
     virtual void write(string text){
         send(_nsfd, text.c_str(), text.size(), 0);
+        cout<<text<<endl;
+        cout<<"***"<<endl;
     }
     void close(){
         ::close(_nsfd);

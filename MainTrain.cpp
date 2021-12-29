@@ -156,7 +156,7 @@ int main(){
 		Server server(port);
 		server.start(adh); // runs on its own thread
 		// let's run 2 clients
-		clientSide1(port,outputFile1);
+		//clientSide1(port,outputFile1);
 		clientSide2(port,outputFile2);
 		server.stop(); // joins the server's thread
 	}catch(const char* s){
