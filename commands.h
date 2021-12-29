@@ -2,8 +2,6 @@
 //Tal Dabran 316040898
 #include <iostream>
 #include <fstream>
-#include <sys/socket.h>
-
 
 #ifndef COMMANDS_H_
 #define COMMANDS_H_
@@ -12,7 +10,6 @@
 #include <string.h>
 #include <fstream>
 #include <vector>
-#include <regex>
 #include "HybridAnomalyDetector.h"
 #include "AnomalyDetector.h"
 #include "CLI.h"
@@ -35,34 +32,11 @@ public:
 
 };
 
-
 class Command {
 protected:
     DefaultIO *_dio;
 public:
     Command(DefaultIO *dio) : _dio(dio) {}
-
-    bool itIsEndWith (string text, string suff){
-        regex re(suff);
-        smatch match;
-        regex_search(text, match, re);
-        return (!match.empty());
-    }
-
-    string cutSuffix(string text, string suff) {
-        regex re(suff);
-        smatch match;
-        regex_search(text, match, re);
-        return match.prefix();
-    }
-
-    string cutPrefix(string text, string pre) {
-        regex re(pre);
-        smatch match;
-        regex_search(text, match, re);
-        return match.suffix();
-
-    }
 
     void MergeSortedIntervals(vector<anoRep> &ar, int s, int m, int e) {
         vector<anoRep> temp;
@@ -90,6 +64,7 @@ public:
             ar[i] = temp[i - s];
     }
 
+
     void MergeSort(vector<anoRep> &ar, unsigned long s, unsigned long e) {
         vector<AnomalyReport> sortedVector;
         if (s < e) {
@@ -99,6 +74,7 @@ public:
             MergeSortedIntervals(ar, s, m, e);
         }
     }
+
 
 /**
 * this function prints only 3 numbers after the decimal point
@@ -130,13 +106,14 @@ public:
     virtual void execute() = 0;
 
     virtual ~Command() {}
+
 };
 
 class uploadAtimeSeriesCommand : public Command {
 public:
     TimeSeries _trainTs;
     TimeSeries _testTs;
-    int _numlines = 0;
+    int _numlines = -1;
 
     uploadAtimeSeriesCommand(DefaultIO *dio) : Command(dio) {}
 
@@ -149,13 +126,11 @@ public:
         serverFile.open("anomalyTrain.csv", fstream::app);
         string w = _dio->read();
         //reading until we get done
-        //while (w != "done") {
-        while (!itIsEndWith(w, "done")) {
+        while (w != "done\n") {
             serverFile << w;
             w = _dio->read();
+            _numlines += 1;
         }
-        w = cutSuffix(w, "done");
-        serverFile << w;
         serverFile.close();
         _dio->write("Upload complete.\n");
         this->_trainTs = TimeSeries("anomalyTrain.csv");
@@ -164,17 +139,13 @@ public:
         serverFile1.open("anomalyTest.csv", fstream::app);
         w = _dio->read();
         //reading from the file until the done
-        while (!itIsEndWith(w, "done")) {
+        while (w != "done\n") {
             serverFile1 << w;
             w = _dio->read();
         }
-        w = cutSuffix(w, "done");
-        serverFile1 << w;
         serverFile1.close();
         _dio->write("Upload complete.\n");
         this->_testTs = TimeSeries("anomalyTest.csv");
-        vector<string> keys = _testTs.getKeysVector();
-        _numlines = _testTs.getValuesByKey(keys[0]).size();
     }
 };
 
@@ -285,20 +256,17 @@ public:
         _dio->write("Please upload your local anomalies file.\n");
         vector<pair<int, int>> sumAnomalies;
         string w = _dio->read();
-        if (w == "\n")
-            string w = _dio->read();
         int P = 0;
-        while (cutSuffix(w, "done\n") != "") {
+        while (w != "done\n") {
             P += 1;
-            string numbers = cutSuffix(w, "\n");
-            w = cutPrefix(w, "\n");
-            stringstream rangeSplit(numbers);
+            stringstream rangeSplit(w);
             string num;
             vector<string> rangeNum;
             while (getline(rangeSplit, num, ',')) {
                 rangeNum.push_back(num);
             }
             sumAnomalies.emplace_back(stoi(rangeNum[0]), stoi(rangeNum[1]));
+            w = _dio->read();
         }
         _dio->write("Upload complete.\n");
         // marge time steps reports
