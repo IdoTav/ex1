@@ -65,14 +65,15 @@ public:
 
 // implement on Server.cpp
 class Server {
-    int sfd, nsfd;
-    // you may add data members
+    int sfd;
+    sockaddr_in serv_addr, cli_addr;
+    thread *t;
+    volatile bool stopping = false;
 
 public:
     Server(int port) throw (const char*){
-        socklen_t clilen;
+        stopping = false;
         char buffer[256];
-        struct sockaddr_in serv_addr, cli_addr;
         int n;
         sfd =  socket(AF_INET, SOCK_STREAM, 0);
         if (sfd < 0)
@@ -81,19 +82,14 @@ public:
         serv_addr.sin_family = AF_INET;
         serv_addr.sin_addr.s_addr = INADDR_ANY;
         serv_addr.sin_port = htons(port);
-        if (bind(sfd, (struct sockaddr *) &serv_addr,
-                 sizeof(serv_addr)) < 0)
+        if (bind(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
             cout<<("ERROR on binding")<<endl;
         listen(sfd, 5);
-        clilen = sizeof(cli_addr);
-        nsfd = accept(sfd,
-                      (struct sockaddr *) &cli_addr, &clilen);
-        if (nsfd < 0)
-            cout<<("ERROR on accept")<<endl;
     }
     void stop();
     virtual ~Server();
-    void start(ClientHandler& ch)throw(const char*);
+    void start(ClientHandler& ch) throw(const char*);
+    void runStart();
 };
 
 #endif /* SERVER_H_ */

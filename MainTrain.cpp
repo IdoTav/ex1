@@ -13,9 +13,6 @@
 #include <time.h>
 #include "Server.h"
 
-
-
-
 using namespace std;
 
 void writeStr(string input,int serverFD){
@@ -52,17 +49,17 @@ int initClient(int port)throw (const char*){
     serverFD = socket(AF_INET, SOCK_STREAM, 0);
     if (serverFD < 0) 
         throw "socket problem";
-    
+
 	server = gethostbyname("localhost");
 	if(server==NULL)
 		throw "no such host";
-	
+
     serv_addr.sin_family = AF_INET;
     bcopy((char *)server->h_addr,(char *)&serv_addr.sin_addr.s_addr,server->h_length);
-		 
     serv_addr.sin_port = htons(port);
     if (connect(serverFD,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
 		throw "connection problem";
+
     return serverFD;	
 }
 
@@ -74,56 +71,51 @@ void clientSide1(int port,string outputFile)throw (const char*){
 	string input="6";
 	writeStr(input,serverFD);
 	close(serverFD);
-	cout<<"end of client 1"<<endl;
+	cout <<"end of client 1"<< endl;
 }
 
-
 void clientSide2(int port,string outputFile)throw (const char*){
-
 	int serverFD = initClient(port);
-	
 	ofstream out(outputFile);
 	ifstream in("input.txt");
 	string input="";
-	while(input!="6"){
+	while(input!= "6"){
 		readMenue(out,serverFD);
 		getline(in,input);			
 		writeStr(input,serverFD);
-		if(input=="1"){
+		if(input == "1"){
 			out<<readStr(serverFD)<<endl; // please upload...
-			while(input!="done"){
+			while(input!= "done"){
 				getline(in,input);
 				writeStr(input,serverFD);
 			}
-			out<<readStr(serverFD)<<endl; // Upload complete
-			out<<readStr(serverFD)<<endl; // please upload...
+			out << readStr(serverFD) << endl; // Upload complete
+			out << readStr(serverFD) << endl; // please upload...
 			input="";
-			while(input!="done"){
+			while(input!= "done"){
 				getline(in,input);
 				writeStr(input,serverFD);
 			}
-			out<<readStr(serverFD)<<endl; // Upload complete
+			out << readStr(serverFD) << endl; // Upload complete
 		}
-		
-		if(input=="3"){
-			out<<readStr(serverFD)<<endl; // Anomaly... complete
+		if(input== "3"){
+			out << readStr(serverFD) << endl; // Anomaly... complete
 		}
-		if(input=="5"){
+		if(input== "5"){
 			out<<readStr(serverFD)<<endl; // please upload...
-			while(input!="done"){
+			while(input!= "done"){
 				getline(in,input);
 				writeStr(input,serverFD);
 			}
-			out<<readStr(serverFD)<<endl; // Upload complete
-			out<<readStr(serverFD)<<endl; // TPR
-			out<<readStr(serverFD)<<endl; // FPR
+			out << readStr(serverFD) << endl; // Upload complete
+			out << readStr(serverFD) << endl; // TPR
+			out << readStr(serverFD) << endl; // FPR
 		}
 	}
 	in.close();	
 	out.close();
-	
     close(serverFD);
-	cout<<"end of client 2"<<endl;
+	cout << "end of client 2" << endl;
 }
 
 size_t check(string outputFile,string expectedOutputFile){
@@ -142,7 +134,6 @@ size_t check(string outputFile,string expectedOutputFile){
 	return i;
 }
 
- 
 int main(){
 	srand (time(NULL));
 	int port=5000+ rand() % 1000;		
@@ -153,7 +144,6 @@ int main(){
 	outputFile1+=".txt";
 	outputFile2+=to_string(x);
 	outputFile2+=".txt";
-	
 	try{
 		AnomalyDetectionHandler adh;
 		Server server(port);
@@ -167,10 +157,8 @@ int main(){
 	}
 	size_t mistakes = check(outputFile1,"expected_output_menu.txt");
 	mistakes += check(outputFile2,"expected_output.txt");
-
 	if(mistakes>0)
 		cout<<"you have "<<mistakes<<" mistakes in your output (-"<<(mistakes*2)<<")"<<endl;
-		
 	cout<<"done"<<endl;	
 	return 0;
 }

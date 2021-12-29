@@ -66,7 +66,6 @@ public:
             ar[i] = temp[i - s];
     }
 
-
     void MergeSort(vector<anoRep> &ar, unsigned long s, unsigned long e) {
         vector<AnomalyReport> sortedVector;
         if (s < e) {
@@ -76,7 +75,6 @@ public:
             MergeSortedIntervals(ar, s, m, e);
         }
     }
-
 
 /**
 * this function prints only 3 numbers after the decimal point
