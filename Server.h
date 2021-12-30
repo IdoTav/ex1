@@ -1,3 +1,5 @@
+//Ido Tavron 316222512
+//Tal Dabran 316040898
 #ifndef SERVER_H_
 #define SERVER_H_
 
@@ -21,47 +23,50 @@ public:
         _sfd = sfd;
         _nsfd = nsfd;
     }
+
+    /*
+     * this is the read function which read line by line from the file
+     */
     virtual string read(){
+        // define a char
         char c = 0;
+        // and empty string
         string s = "";
+        // scan until we get to '\n'
         while(c!='\n') {
+            // get the c
             recv(_nsfd, &c,sizeof(char), 0);
+            // concat c to s
             s += c;
         }
+        // return s
         return s;
     }
+
+    /*
+     * this is the write function that sent the string
+     * we are want to write in the file
+     */
     virtual void write(string text){
         send(_nsfd, text.c_str(), text.size(), 0);
     }
-    void close(){
-        ::close(_nsfd);
-        ::close(_sfd);
-    }
     ~NewIO(){
-        close();
     }
 };
 
 
-// edit your ClientHandler interface here:
 class ClientHandler{
 public:
     virtual void handle(int clientID)=0;
 };
 
 
-// you can add helper classes here and implement on the cpp file
-
-
-// edit your AnomalyDetectionHandler class here
 class AnomalyDetectionHandler:public ClientHandler{
 public:
     virtual void handle(int clientID){
     }
 };
 
-
-// implement on Server.cpp
 class Server {
     int sfd;
     sockaddr_in serv_addr, cli_addr;
@@ -69,6 +74,10 @@ class Server {
     volatile bool stopping = false;
 
 public:
+    /*
+     * this is the constructor of the server class
+     * which creates the server socket
+     */
     Server(int port) throw (const char*){
         stopping = false;
         char buffer[256];

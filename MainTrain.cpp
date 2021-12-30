@@ -30,8 +30,7 @@ string readStr(int serverFD){
 
 void readMenue(ofstream& out,int serverFD){
 	bool done=false;
-	while(!done){			
-		// read string line
+	while(!done){
 		string serverInput = readStr(serverFD);
 		if(serverInput=="6.exit")
 			done=true;
